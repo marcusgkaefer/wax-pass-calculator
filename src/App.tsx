@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,6 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import MapView from "./pages/MapView";
+import StepByStep from "./pages/StepByStep";
+import CardBased from "./pages/CardBased";
+import SinglePage from "./pages/SinglePage";
+import TabLayout from "./pages/TabLayout";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +22,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/map-view" element={<MapView />} />
+          <Route path="/step-by-step" element={<StepByStep />} />
+          <Route path="/card-based" element={<CardBased />} />
+          <Route path="/single-page" element={<SinglePage />} />
+          <Route path="/tab-layout" element={<TabLayout />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

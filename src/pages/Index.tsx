@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import LocationSearch from '../components/LocationSearch';
 import PricingForm from '../components/PricingForm';
 
@@ -33,6 +34,34 @@ const Index = () => {
               Select Your Pass Details
             </h2>
             <PricingForm locationSelected={!!selectedLocation} />
+          </div>
+        </div>
+
+        <div className="mt-12 border-t pt-8">
+          <h3 className="text-lg font-semibold text-purple-900 mb-4 text-center">
+            Explore Different UI/UX Approaches
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link to="/map-view" className="block p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+              <h4 className="font-medium text-purple-900">Map-Based View</h4>
+              <p className="text-sm text-purple-700">Find centers visually on an interactive map</p>
+            </Link>
+            <Link to="/step-by-step" className="block p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+              <h4 className="font-medium text-purple-900">Step-by-Step Flow</h4>
+              <p className="text-sm text-purple-700">Guided wizard experience with clear steps</p>
+            </Link>
+            <Link to="/card-based" className="block p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+              <h4 className="font-medium text-purple-900">Card-Based Selection</h4>
+              <p className="text-sm text-purple-700">Visual card interface for all selections</p>
+            </Link>
+            <Link to="/single-page" className="block p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+              <h4 className="font-medium text-purple-900">Single Page Experience</h4>
+              <p className="text-sm text-purple-700">Everything in one scrollable view</p>
+            </Link>
+            <Link to="/tab-layout" className="block p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+              <h4 className="font-medium text-purple-900">Tab Layout</h4>
+              <p className="text-sm text-purple-700">Tab-based organization of selection process</p>
+            </Link>
           </div>
         </div>
 
