@@ -11,6 +11,7 @@ import StepByStep from "./pages/StepByStep";
 import CardBased from "./pages/CardBased";
 import SinglePage from "./pages/SinglePage";
 import TabLayout from "./pages/TabLayout";
+import ServiceSelector from "./pages/ServiceSelector";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/card-based" element={<CardBased />} />
           <Route path="/single-page" element={<SinglePage />} />
           <Route path="/tab-layout" element={<TabLayout />} />
+          <Route path="/service-selector" element={<ServiceSelector />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
