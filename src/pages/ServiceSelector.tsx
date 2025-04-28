@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import PageHeader from "@/components/PageHeader";
-import { services, serviceCategories, type Service } from "@/data/servicesData";
+import { services, serviceCategories } from "@/data/servicesData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -15,6 +14,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Search, Filter, Grid2X2, List, Tag, CirclePlus, CircleCheck } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import ServiceBodyMap from "@/components/ServiceBodyMap";
+import SelectedServicesSummary from "@/components/SelectedServicesSummary";
 
 const ServiceSelector = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -81,106 +82,17 @@ const ServiceSelector = () => {
         {/* Body Map Explorer */}
         <TabsContent value="interactive-map" className="pt-4">
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-purple-50 rounded-2xl p-6 flex items-center justify-center">
-              <div className="relative w-64 h-[500px]">
-                {/* This would be replaced with an actual interactive SVG body map */}
-                <div className="w-full h-full bg-white/50 rounded-lg flex items-center justify-center">
-                  <p className="text-center text-purple-600 font-medium">
-                    Interactive Body Map<br/>
-                    <span className="text-sm text-purple-400">(Click on areas to select services)</span>
-                  </p>
-                </div>
-                
-                {/* Example hotspots */}
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="absolute top-[20%] left-[30%] rounded-full h-8 w-8 p-0 bg-purple-100 hover:bg-purple-200 border-purple-300"
-                  onClick={() => toggleService("eyebrows")}
-                >
-                  {selectedServices.includes("eyebrows") ? 
-                    <CircleCheck className="h-4 w-4 text-purple-700" /> :
-                    <CirclePlus className="h-4 w-4 text-purple-700" />
-                  }
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="absolute top-[45%] left-[50%] rounded-full h-8 w-8 p-0 bg-purple-100 hover:bg-purple-200 border-purple-300"
-                  onClick={() => toggleService("underarms")}
-                >
-                  {selectedServices.includes("underarms") ? 
-                    <CircleCheck className="h-4 w-4 text-purple-700" /> :
-                    <CirclePlus className="h-4 w-4 text-purple-700" />
-                  }
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="absolute top-[65%] left-[40%] rounded-full h-8 w-8 p-0 bg-purple-100 hover:bg-purple-200 border-purple-300"
-                  onClick={() => toggleService("bikini_line_v")}
-                >
-                  {selectedServices.includes("bikini_line_v") ? 
-                    <CircleCheck className="h-4 w-4 text-purple-700" /> :
-                    <CirclePlus className="h-4 w-4 text-purple-700" />
-                  }
-                </Button>
-              </div>
-            </div>
+            <ServiceBodyMap 
+              selectedServices={selectedServices} 
+              toggleService={toggleService} 
+            />
             
             <div>
               <h3 className="text-xl font-semibold text-purple-900 mb-4">Selected Services</h3>
-              <div className="space-y-3">
-                {selectedServices.map(serviceId => {
-                  const service = services.find(s => s.id === serviceId);
-                  if (!service) return null;
-                  
-                  return (
-                    <div 
-                      key={service.id} 
-                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-purple-100"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="bg-purple-100 p-2 rounded-full">
-                          {/* We would use actual icons here */}
-                          <div className="w-5 h-5 text-purple-600"></div>
-                        </div>
-                        <span>{service.name}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold">${service.price}</span>
-                        <Button variant="ghost" size="sm" onClick={() => toggleService(serviceId)}>
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-                
-                {selectedServices.length === 0 && (
-                  <div className="text-center p-8 text-gray-500">
-                    Click on body parts to select services
-                  </div>
-                )}
-                
-                {selectedServices.length > 0 && (
-                  <div className="mt-6">
-                    <div className="flex justify-between py-2 border-t border-b border-purple-100 my-4">
-                      <span className="font-semibold">Total:</span>
-                      <span className="font-bold">
-                        ${selectedServices.reduce((sum, id) => {
-                          const service = services.find(s => s.id === id);
-                          return sum + (service?.price || 0);
-                        }, 0).toFixed(2)}
-                      </span>
-                    </div>
-                    
-                    <Button className="w-full">Continue</Button>
-                  </div>
-                )}
-              </div>
+              <SelectedServicesSummary 
+                selectedServiceIds={selectedServices}
+                toggleService={toggleService}
+              />
             </div>
           </div>
         </TabsContent>
