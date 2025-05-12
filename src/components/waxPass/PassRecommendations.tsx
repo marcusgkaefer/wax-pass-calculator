@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useWaxPass } from '@/lib/WaxPassContext';
-import { SelectedPass, PaymentPlan } from '@/data/waxPassData';
 import { 
   calculatePaymentPlans, 
   formatCurrency, 
   getServicePassOptions,
   PrepaidPassDetails,
-  UnlimitedPassDetails
+  UnlimitedPassDetails,
+  PaymentPlan
 } from '@/lib/waxPassCalculations';
 
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ interface PassRecommendationsProps {
 }
 
 export default function PassRecommendations({ onBack, onContinue }: PassRecommendationsProps) {
-  const { selectedServices, selectedPasses, addOrUpdatePass } = useWaxPass();
+  const { selectedWaxCenter, selectedServices, selectedPasses, addOrUpdatePass } = useWaxPass();
   
   // Track selected payment plan for each pass
   const [selectedPaymentPlans, setSelectedPaymentPlans] = useState<Record<string, number>>({});
@@ -41,40 +41,49 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
   
   // Handle selecting a pass
   const handleSelectPass = (
-    serviceId: string, 
-    serviceName: string,
-    passType: string,
-    passTitle: string,
-    totalCost: number,
-    totalSavings: number,
-    isPrepaid: boolean,
-    details: PrepaidPassDetails | UnlimitedPassDetails
+    serviceId: string,
+    passType: 'unlimited' | 'prepaid',
+    passLevel: string,
+    price: number
   ) => {
-    const key = `${serviceId}-${passType}`;
-    const installments = selectedPaymentPlans[key] || 1; // Default to Pay in Full
-    
-    const paymentPlans = calculatePaymentPlans(totalCost);
-    const selectedPaymentPlan = paymentPlans.find(plan => plan.installments === installments) || paymentPlans[0];
-    
-    const selectedPass: SelectedPass = {
+    addOrUpdatePass({
       service_id: serviceId,
-      service_name: serviceName,
-      pass_type_selected: passType,
-      pass_title_display: passTitle,
-      final_total_pass_cost: totalCost,
-      selected_payment_plan: selectedPaymentPlan,
-      total_savings_achieved_for_this_pass: totalSavings
-    };
-    
-    addOrUpdatePass(selectedPass);
+      pass_type: passType,
+      pass_level: passLevel,
+      price: price
+    });
   };
   
   // Check if a specific pass is selected
-  const isPassSelected = (serviceId: string, passType: string): boolean => {
+  const isPassSelected = (serviceId: string, passType: 'unlimited' | 'prepaid', passLevel: string): boolean => {
     return selectedPasses.some(
-      pass => pass.service_id === serviceId && pass.pass_type_selected === passType
+      pass => pass.service_id === serviceId && 
+              pass.pass_type === passType && 
+              pass.pass_level === passLevel
     );
   };
+
+  if (!selectedWaxCenter) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-lg text-gray-600 mb-4">Please select a wax center first.</p>
+        <Button onClick={onBack}>
+          Back to Location Selection
+        </Button>
+      </div>
+    );
+  }
+  
+  if (selectedServices.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-lg text-gray-600 mb-4">Please select at least one service first.</p>
+        <Button onClick={onBack}>
+          Back to Service Selection
+        </Button>
+      </div>
+    );
+  }
   
   return (
     <div>
@@ -118,13 +127,10 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                   <h4 className="text-lg font-medium mb-3">Prepaid Pass Options</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {prepaidOptions.map(option => {
-                      const passType = `prepaid-${option.passRuleId}`;
-                      const paymentKey = `${service.service_id}-${passType}`;
-                      const selectedInstallments = selectedPaymentPlans[paymentKey] || 1;
-                      const paymentPlans = calculatePaymentPlans(option.totalPassCost);
+                      const passLevel = option.passRuleId;
                       
                       return (
-                        <Card key={passType} className={`overflow-hidden ${isPassSelected(service.service_id, passType) ? 'border-primary' : ''}`}>
+                        <Card key={passLevel} className={`overflow-hidden ${isPassSelected(service.service_id, 'prepaid', passLevel) ? 'border-primary' : ''}`}>
                           {isBestValue(option) && (
                             <div className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 text-center">
                               BEST VALUE
@@ -180,47 +186,17 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                               </p>
                             </div>
                             
-                            <Separator className="my-4" />
-                            
-                            <div className="mb-4">
-                              <h6 className="font-medium mb-2">Payment Options</h6>
-                              <RadioGroup 
-                                value={String(selectedInstallments)} 
-                                onValueChange={(value) => handlePaymentPlanChange(
-                                  service.service_id, 
-                                  passType, 
-                                  parseInt(value)
-                                )}
-                              >
-                                {paymentPlans.map(plan => (
-                                  <div key={plan.installments} className="flex items-center space-x-2">
-                                    <RadioGroupItem value={String(plan.installments)} id={`${paymentKey}-${plan.installments}`} />
-                                    <Label htmlFor={`${paymentKey}-${plan.installments}`}>
-                                      {plan.installments === 1 
-                                        ? `Pay in Full: ${formatCurrency(plan.amount_per_installment)}`
-                                        : `${plan.installments} Payments of ${formatCurrency(plan.amount_per_installment)} each`
-                                      }
-                                    </Label>
-                                  </div>
-                                ))}
-                              </RadioGroup>
-                            </div>
-                            
                             <Button 
                               className="w-full" 
                               onClick={() => handleSelectPass(
                                 service.service_id,
-                                service.service_name,
-                                passType,
-                                `${service.service_name} - Prepaid (${option.description})`,
-                                option.totalPassCost,
-                                option.totalSavings,
-                                true,
-                                option
+                                'prepaid',
+                                passLevel,
+                                option.totalPassCost
                               )}
-                              variant={isPassSelected(service.service_id, passType) ? "secondary" : "default"}
+                              variant={isPassSelected(service.service_id, 'prepaid', passLevel) ? "secondary" : "default"}
                             >
-                              {isPassSelected(service.service_id, passType) ? "Selected" : "Select This Pass"}
+                              {isPassSelected(service.service_id, 'prepaid', passLevel) ? "Selected" : "Select This Pass"}
                             </Button>
                           </CardContent>
                         </Card>
@@ -236,13 +212,10 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                   <h4 className="text-lg font-medium mb-3">Unlimited Pass Options</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {unlimitedOptions.map(option => {
-                      const passType = `unlimited-${option.passTypeCode}`;
-                      const paymentKey = `${service.service_id}-${passType}`;
-                      const selectedInstallments = selectedPaymentPlans[paymentKey] || 1;
-                      const paymentPlans = calculatePaymentPlans(option.totalPassPrice);
+                      const passLevel = option.passTypeCode;
                       
                       return (
-                        <Card key={passType} className={`overflow-hidden ${isPassSelected(service.service_id, passType) ? 'border-primary' : ''}`}>
+                        <Card key={passLevel} className={`overflow-hidden ${isPassSelected(service.service_id, 'unlimited', passLevel) ? 'border-primary' : ''}`}>
                           {isBestValue(option) && (
                             <div className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 text-center">
                               BEST VALUE
@@ -298,47 +271,17 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                               </p>
                             </div>
                             
-                            <Separator className="my-4" />
-                            
-                            <div className="mb-4">
-                              <h6 className="font-medium mb-2">Payment Options</h6>
-                              <RadioGroup 
-                                value={String(selectedInstallments)} 
-                                onValueChange={(value) => handlePaymentPlanChange(
-                                  service.service_id, 
-                                  passType, 
-                                  parseInt(value)
-                                )}
-                              >
-                                {paymentPlans.map(plan => (
-                                  <div key={plan.installments} className="flex items-center space-x-2">
-                                    <RadioGroupItem value={String(plan.installments)} id={`${paymentKey}-${plan.installments}`} />
-                                    <Label htmlFor={`${paymentKey}-${plan.installments}`}>
-                                      {plan.installments === 1 
-                                        ? `Pay in Full: ${formatCurrency(plan.amount_per_installment)}`
-                                        : `${plan.installments} Payments of ${formatCurrency(plan.amount_per_installment)} each`
-                                      }
-                                    </Label>
-                                  </div>
-                                ))}
-                              </RadioGroup>
-                            </div>
-                            
                             <Button 
                               className="w-full" 
                               onClick={() => handleSelectPass(
                                 service.service_id,
-                                service.service_name,
-                                passType,
-                                `${service.service_name} - Unlimited (${option.description})`,
-                                option.totalPassPrice,
-                                option.totalSavings,
-                                false,
-                                option
+                                'unlimited',
+                                passLevel,
+                                option.totalPassPrice
                               )}
-                              variant={isPassSelected(service.service_id, passType) ? "secondary" : "default"}
+                              variant={isPassSelected(service.service_id, 'unlimited', passLevel) ? "secondary" : "default"}
                             >
-                              {isPassSelected(service.service_id, passType) ? "Selected" : "Select This Pass"}
+                              {isPassSelected(service.service_id, 'unlimited', passLevel) ? "Selected" : "Select This Pass"}
                             </Button>
                           </CardContent>
                         </Card>

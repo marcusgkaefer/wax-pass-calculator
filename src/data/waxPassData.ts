@@ -2,10 +2,11 @@
 export interface WaxService {
   service_id: string;
   service_name: string;
-  standard_price: number;
   category: string;
-  is_eligible_for_prepaid_pass: boolean;
-  is_eligible_for_unlimited_pass: boolean;
+  standard_price: number;
+  description?: string;
+  is_eligible_for_prepaid_pass?: boolean;
+  is_eligible_for_unlimited_pass?: boolean;
   prepaid_pass_rules_applicable?: string[];
   unlimited_pass_options_available?: string[];
 }
@@ -40,155 +41,111 @@ export interface PaymentPlan {
 // Selected pass interface for checkout
 export interface SelectedPass {
   service_id: string;
-  service_name: string;
-  pass_type_selected: string;
-  pass_title_display: string;
-  final_total_pass_cost: number;
-  selected_payment_plan: PaymentPlan;
-  total_savings_achieved_for_this_pass: number;
+  pass_type: 'unlimited' | 'prepaid';
+  pass_level: string;
+  price: number;
 }
 
 // Mock Services Data (From Price Sheet.html)
 export const waxServices: WaxService[] = [
   {
-    service_id: "arms_full",
-    service_name: "Arms - Full",
-    standard_price: 52,
-    category: "Body",
-    is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
-  },
-  {
-    service_id: "arms_half",
-    service_name: "Arms - Half",
-    standard_price: 46,
-    category: "Body",
-    is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
-  },
-  {
-    service_id: "back_full",
-    service_name: "Back - Full",
-    standard_price: 75,
-    category: "Body",
-    is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
-  },
-  {
-    service_id: "back_lower",
-    service_name: "Back - Lower",
-    standard_price: 28,
-    category: "Body",
-    is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
-  },
-  {
-    service_id: "bikini_full",
-    service_name: "Bikini Full",
-    standard_price: 56,
-    category: "Bikini Area",
-    is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: true,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"],
-    unlimited_pass_options_available: ["12U2", "12U3", "13U2", "13U3"]
-  },
-  {
-    service_id: "bikini_line",
-    service_name: "Bikini Line",
-    standard_price: 50,
-    category: "Bikini Area",
-    is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: true,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"],
-    unlimited_pass_options_available: ["12U2", "12U3", "13U2", "13U3"]
-  },
-  {
-    service_id: "brazilian",
-    service_name: "Brazilian",
-    standard_price: 66,
-    category: "Bikini Area",
-    is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: true,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"],
-    unlimited_pass_options_available: ["12U2", "12U3", "13U2", "13U3"]
-  },
-  {
-    service_id: "brow_tint",
-    service_name: "Brow Tint",
+    service_id: 'eyebrow',
+    service_name: 'Eyebrow Wax',
+    category: 'Face',
     standard_price: 25,
-    category: "Face",
+    description: 'Shape and define your brows',
     is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
+    is_eligible_for_unlimited_pass: true
   },
   {
-    service_id: "chin",
-    service_name: "Chin",
+    service_id: 'lip',
+    service_name: 'Lip Wax',
+    category: 'Face',
     standard_price: 15,
-    category: "Face",
+    description: 'Smooth upper lip waxing',
     is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
+    is_eligible_for_unlimited_pass: false
   },
   {
-    service_id: "eyebrows",
-    service_name: "Eyebrows",
-    standard_price: 25,
-    category: "Face",
+    service_id: 'chin',
+    service_name: 'Chin Wax',
+    category: 'Face',
+    standard_price: 15,
+    description: 'Remove unwanted chin hair',
     is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: true,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"],
-    unlimited_pass_options_available: ["12U2", "12U3", "13U2", "13U3"]
+    is_eligible_for_unlimited_pass: false
   },
   {
-    service_id: "full_face",
-    service_name: "Full Face",
-    standard_price: 65,
-    category: "Face",
-    is_eligible_for_prepaid_pass: false,
-    is_eligible_for_unlimited_pass: true,
-    unlimited_pass_options_available: ["12U2", "12U3", "13U2", "13U3"]
+    service_id: 'fullface',
+    service_name: 'Full Face Wax',
+    category: 'Face',
+    standard_price: 50,
+    description: 'Complete facial waxing treatment',
+    is_eligible_for_prepaid_pass: true,
+    is_eligible_for_unlimited_pass: true
   },
   {
-    service_id: "legs_full",
-    service_name: "Legs - Full",
-    standard_price: 80,
-    category: "Body",
+    service_id: 'brazilian',
+    service_name: 'Brazilian Wax',
+    category: 'Body',
+    standard_price: 60,
+    description: 'Complete hair removal in the bikini area',
     is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
+    is_eligible_for_unlimited_pass: true
   },
   {
-    service_id: "legs_lower",
-    service_name: "Legs - Lower",
-    standard_price: 52,
-    category: "Body",
+    service_id: 'bikini',
+    service_name: 'Bikini Wax',
+    category: 'Body',
+    standard_price: 40,
+    description: 'Basic bikini line waxing',
     is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
+    is_eligible_for_unlimited_pass: true
   },
   {
-    service_id: "lip_upper",
-    service_name: "Lip - Upper",
-    standard_price: 14,
-    category: "Face",
+    service_id: 'leg-half',
+    service_name: 'Half Leg Wax',
+    category: 'Body',
+    standard_price: 45,
+    description: 'Waxing for lower or upper legs',
     is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: false,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"]
+    is_eligible_for_unlimited_pass: false
   },
   {
-    service_id: "underarms",
-    service_name: "Underarms",
-    standard_price: 26,
-    category: "Body",
+    service_id: 'leg-full',
+    service_name: 'Full Leg Wax',
+    category: 'Body',
+    standard_price: 75,
+    description: 'Complete leg waxing treatment',
     is_eligible_for_prepaid_pass: true,
-    is_eligible_for_unlimited_pass: true,
-    prepaid_pass_rules_applicable: ["B9G3", "B9G2", "B6G1"],
-    unlimited_pass_options_available: ["12U2", "12U3", "13U2", "13U3"]
+    is_eligible_for_unlimited_pass: false
+  },
+  {
+    service_id: 'underarm',
+    service_name: 'Underarm Wax',
+    category: 'Body',
+    standard_price: 20,
+    description: 'Smooth underarm hair removal',
+    is_eligible_for_prepaid_pass: true,
+    is_eligible_for_unlimited_pass: true
+  },
+  {
+    service_id: 'back',
+    service_name: 'Back Wax',
+    category: 'Body',
+    standard_price: 55,
+    description: 'Full back hair removal',
+    is_eligible_for_prepaid_pass: true,
+    is_eligible_for_unlimited_pass: false
+  },
+  {
+    service_id: 'chest',
+    service_name: 'Chest Wax',
+    category: 'Body',
+    standard_price: 50,
+    description: 'Full chest hair removal',
+    is_eligible_for_prepaid_pass: true,
+    is_eligible_for_unlimited_pass: false
   }
 ];
 

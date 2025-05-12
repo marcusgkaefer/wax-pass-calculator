@@ -4,26 +4,20 @@ import { formatCurrency } from '@/lib/waxPassCalculations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Check, Edit, X } from 'lucide-react';
-import { format, addMonths } from 'date-fns';
+import { ArrowLeft, Check, Edit, X, MapPin } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface SummaryCheckoutProps {
   onBack: () => void;
 }
 
 export default function SummaryCheckout({ onBack }: SummaryCheckoutProps) {
-  const { selectedPasses, removePass } = useWaxPass();
+  const { selectedWaxCenter, selectedServices, selectedPasses, removePass } = useWaxPass();
   const [isPaymentComplete, setIsPaymentComplete] = useState(false);
   
-  // Calculate the total amount due today across all passes
-  const totalDueToday = selectedPasses.reduce(
-    (sum, pass) => sum + pass.selected_payment_plan.first_payment_due, 
-    0
-  );
-  
-  // Calculate total savings across all passes
-  const totalSavings = selectedPasses.reduce(
-    (sum, pass) => sum + pass.total_savings_achieved_for_this_pass,
+  // Calculate the total amount due
+  const totalDue = selectedPasses.reduce(
+    (sum, pass) => sum + pass.price, 
     0
   );
   
@@ -33,9 +27,10 @@ export default function SummaryCheckout({ onBack }: SummaryCheckoutProps) {
     setIsPaymentComplete(true);
   };
   
-  // Get the next payment date (1 month from now)
-  const getNextPaymentDate = () => {
-    return format(addMonths(new Date(), 1), 'MMM d, yyyy');
+  // Find service name by service ID
+  const getServiceName = (serviceId: string) => {
+    const service = selectedServices.find(s => s.service_id === serviceId);
+    return service ? service.service_name : 'Unknown Service';
   };
   
   if (isPaymentComplete) {
@@ -53,16 +48,36 @@ export default function SummaryCheckout({ onBack }: SummaryCheckoutProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="font-semibold mb-2">Purchase Details</h3>
-            <p className="text-muted-foreground">Amount Paid: {formatCurrency(totalDueToday)}</p>
+            <p className="text-muted-foreground">Amount Paid: {formatCurrency(totalDue)}</p>
             <p className="text-muted-foreground">Date: {format(new Date(), 'MMM d, yyyy')}</p>
-            <p className="text-green-600 font-medium mt-2">
-              Total Savings: {formatCurrency(totalSavings)}
-            </p>
+            <p className="text-muted-foreground">Location: {selectedWaxCenter?.display_name}</p>
           </CardContent>
         </Card>
         
         <Button className="mt-8" onClick={() => window.location.href = "/"}>
           Return to Home
+        </Button>
+      </div>
+    );
+  }
+  
+  if (!selectedWaxCenter) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-lg text-gray-600 mb-4">Please select a wax center first.</p>
+        <Button onClick={onBack}>
+          Back to Location Selection
+        </Button>
+      </div>
+    );
+  }
+  
+  if (selectedPasses.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-lg text-gray-600 mb-4">Please select at least one pass first.</p>
+        <Button onClick={onBack}>
+          Back to Pass Options
         </Button>
       </div>
     );
@@ -77,28 +92,27 @@ export default function SummaryCheckout({ onBack }: SummaryCheckoutProps) {
       
       <h2 className="text-2xl font-bold mb-6">Review Your Selections</h2>
       
+      <div className="mb-4">
+        <div className="flex items-center text-gray-600 mb-4">
+          <MapPin className="h-5 w-5 mr-2 text-primary" />
+          <p>Wax center: <span className="font-medium">{selectedWaxCenter.display_name}</span></p>
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <div className="space-y-4">
             {selectedPasses.map((pass) => {
-              // Calculate future payment dates if applicable
-              const futurePayments = [];
-              if (pass.selected_payment_plan.installments > 1) {
-                for (let i = 1; i < pass.selected_payment_plan.installments; i++) {
-                  futurePayments.push({
-                    amount: pass.selected_payment_plan.amount_per_installment,
-                    date: format(addMonths(new Date(), i), 'MMM d, yyyy')
-                  });
-                }
-              }
+              const serviceName = getServiceName(pass.service_id);
+              const passTypeDisplay = pass.pass_type === 'prepaid' ? 'Prepaid Pass' : 'Unlimited Pass';
               
               return (
                 <Card key={pass.service_id}>
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="font-semibold text-lg">{pass.service_name}</h3>
-                        <p className="text-muted-foreground">{pass.pass_title_display}</p>
+                        <h3 className="font-semibold text-lg">{serviceName}</h3>
+                        <p className="text-muted-foreground">{passTypeDisplay} - {pass.pass_level}</p>
                       </div>
                       <Button 
                         variant="ghost" 
@@ -111,40 +125,10 @@ export default function SummaryCheckout({ onBack }: SummaryCheckoutProps) {
                     
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between">
-                        <span>Total Cost:</span>
-                        <span className="font-medium">{formatCurrency(pass.final_total_pass_cost)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Payment Plan:</span>
-                        <span>
-                          {pass.selected_payment_plan.installments === 1 
-                            ? 'Pay in Full' 
-                            : `${pass.selected_payment_plan.installments} Payments`}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Due Today:</span>
-                        <span className="font-medium">{formatCurrency(pass.selected_payment_plan.first_payment_due)}</span>
-                      </div>
-                      <div className="flex justify-between text-green-600">
-                        <span>Total Savings:</span>
-                        <span className="font-medium">{formatCurrency(pass.total_savings_achieved_for_this_pass)}</span>
+                        <span>Total Price:</span>
+                        <span className="font-medium">{formatCurrency(pass.price)}</span>
                       </div>
                     </div>
-                    
-                    {futurePayments.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Future Payments</h4>
-                        <div className="space-y-1 text-sm text-muted-foreground">
-                          {futurePayments.map((payment, index) => (
-                            <div key={index} className="flex justify-between">
-                              <span>{payment.date}</span>
-                              <span>{formatCurrency(payment.amount)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </CardContent>
                   <CardFooter className="bg-muted/50 p-4">
                     <Button variant="outline" size="sm" className="ml-auto" onClick={onBack}>
@@ -166,8 +150,8 @@ export default function SummaryCheckout({ onBack }: SummaryCheckoutProps) {
               <div className="space-y-3 mb-6">
                 {selectedPasses.map((pass) => (
                   <div key={pass.service_id} className="flex justify-between text-sm">
-                    <span>{pass.service_name}</span>
-                    <span>{formatCurrency(pass.selected_payment_plan.first_payment_due)}</span>
+                    <span>{getServiceName(pass.service_id)}</span>
+                    <span>{formatCurrency(pass.price)}</span>
                   </div>
                 ))}
               </div>
@@ -176,12 +160,8 @@ export default function SummaryCheckout({ onBack }: SummaryCheckoutProps) {
               
               <div className="space-y-3">
                 <div className="flex justify-between font-medium">
-                  <span>Subtotal Due Today</span>
-                  <span>{formatCurrency(totalDueToday)}</span>
-                </div>
-                <div className="flex justify-between text-green-600 font-medium">
-                  <span>Total Savings</span>
-                  <span>{formatCurrency(totalSavings)}</span>
+                  <span>Total</span>
+                  <span>{formatCurrency(totalDue)}</span>
                 </div>
               </div>
               
@@ -198,18 +178,6 @@ export default function SummaryCheckout({ onBack }: SummaryCheckoutProps) {
               </p>
             </CardContent>
           </Card>
-          
-          {/* Payment Plan Info */}
-          {selectedPasses.some(pass => pass.selected_payment_plan.installments > 1) && (
-            <Card className="mt-4">
-              <CardContent className="p-4">
-                <h4 className="font-medium text-sm mb-2">Payment Plan Information</h4>
-                <p className="text-xs text-muted-foreground">
-                  You have selected a payment plan for one or more passes. Your first payment will be charged today, and future payments will be automatically processed on a monthly basis starting {getNextPaymentDate()}.
-                </p>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </div>

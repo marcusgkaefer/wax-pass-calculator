@@ -1,7 +1,17 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { WaxService, SelectedPass } from '@/data/waxPassData';
 
+// Wax Center type definition
+interface WaxCenter {
+  id: string;
+  display_name: string;
+}
+
 interface WaxPassContextType {
+  // Selected wax center in Phase 0
+  selectedWaxCenter: WaxCenter | null;
+  setSelectedWaxCenter: (center: WaxCenter | null) => void;
+  
   // Selected services in Phase 1
   selectedServices: WaxService[];
   addService: (service: WaxService) => void;
@@ -19,6 +29,7 @@ interface WaxPassContextType {
 const WaxPassContext = createContext<WaxPassContextType | undefined>(undefined);
 
 export const WaxPassProvider = ({ children }: { children: ReactNode }) => {
+  const [selectedWaxCenter, setSelectedWaxCenter] = useState<WaxCenter | null>(null);
   const [selectedServices, setSelectedServices] = useState<WaxService[]>([]);
   const [selectedPasses, setSelectedPasses] = useState<SelectedPass[]>([]);
 
@@ -50,12 +61,15 @@ export const WaxPassProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const clearSelections = () => {
+    setSelectedWaxCenter(null);
     setSelectedServices([]);
     setSelectedPasses([]);
   };
 
   return (
     <WaxPassContext.Provider value={{
+      selectedWaxCenter,
+      setSelectedWaxCenter,
       selectedServices,
       addService,
       removeService,
