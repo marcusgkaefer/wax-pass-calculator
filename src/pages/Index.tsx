@@ -1,13 +1,7 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
 
 const Index = () => {
   return (
@@ -123,9 +117,26 @@ const Index = () => {
             </Button>
           </CardFooter>
         </Card>
+
+        <Card className="hover:shadow-lg transition-all border-purple-400">
+          <CardHeader className="bg-gradient-to-r from-purple-700 to-purple-900 text-white">
+            <CardTitle>Wax Pass Calculator</CardTitle>
+            <CardDescription className="text-purple-100">
+              Calculate savings with prepaid passes
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <p className="text-gray-600">Find the best Wax Pass options based on your selected services and see your potential savings.</p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/wax-pass-calculator">View Demo</Link>
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Index;
