@@ -16,8 +16,16 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Info } from 'lucide-react';
+import { ArrowLeft, Info, Calendar } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { format, addMonths } from 'date-fns';
 
 interface PassRecommendationsProps {
   onBack: () => void;
@@ -31,12 +39,34 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
   const [selectedPaymentPlans, setSelectedPaymentPlans] = useState<Record<string, number>>({});
   
   // Handle selecting a payment plan for a specific pass
-  const handlePaymentPlanChange = (serviceId: string, passType: string, installments: number) => {
-    const key = `${serviceId}-${passType}`;
+  const handlePaymentPlanChange = (serviceId: string, passType: string, passLevel: string, installments: number) => {
+    const key = `${serviceId}-${passType}-${passLevel}`;
     setSelectedPaymentPlans(prev => ({
       ...prev,
       [key]: installments
     }));
+  };
+  
+  // Get the selected installments for a specific pass
+  const getSelectedInstallments = (serviceId: string, passType: string, passLevel: string): number => {
+    const key = `${serviceId}-${passType}-${passLevel}`;
+    return selectedPaymentPlans[key] || 1; // Default to 1 installment
+  };
+  
+  // Calculate monthly price based on total price and installments
+  const calculateMonthlyPrice = (totalPrice: number, installments: number): number => {
+    return totalPrice / installments;
+  };
+
+  // Generate payment dates based on number of installments
+  const getPaymentDates = (installments: number): Date[] => {
+    const dates: Date[] = [new Date()]; // First payment is today
+    
+    for (let i = 1; i < installments; i++) {
+      dates.push(addMonths(new Date(), i));
+    }
+    
+    return dates;
   };
   
   // Handle selecting a pass
@@ -46,11 +76,15 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
     passLevel: string,
     price: number
   ) => {
+    // Get the number of installments
+    const installments = getSelectedInstallments(serviceId, passType, passLevel);
+    
     addOrUpdatePass({
       service_id: serviceId,
       pass_type: passType,
       pass_level: passLevel,
-      price: price
+      price: price,
+      installments: installments
     });
   };
   
@@ -128,9 +162,13 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {prepaidOptions.map(option => {
                       const passLevel = option.passRuleId;
+                      const selectedInstallments = getSelectedInstallments(service.service_id, 'prepaid', passLevel);
+                      const monthlyPrice = calculateMonthlyPrice(option.totalPassCost, selectedInstallments);
+                      const isSelected = isPassSelected(service.service_id, 'prepaid', passLevel);
+                      const paymentDates = getPaymentDates(selectedInstallments);
                       
                       return (
-                        <Card key={passLevel} className={`overflow-hidden ${isPassSelected(service.service_id, 'prepaid', passLevel) ? 'border-primary' : ''}`}>
+                        <Card key={passLevel} className={`overflow-hidden ${isSelected ? 'border-primary' : ''}`}>
                           {isBestValue(option) && (
                             <div className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 text-center">
                               BEST VALUE
@@ -180,10 +218,63 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                             </div>
                             
                             <div className="mb-4">
-                              <p className="font-medium">Total Pass Cost: {formatCurrency(option.totalPassCost)}</p>
+                              <div className="flex justify-between">
+                                <p className="font-medium">Total Pass Cost:</p>
+                                <p className="font-medium">{formatCurrency(option.totalPassCost)}</p>
+                              </div>
                               <p className="text-sm text-muted-foreground">
                                 For {option.totalServicesInPass} services total
                               </p>
+                            </div>
+                            
+                            {/* Installment Selector */}
+                            <div className="mb-4 border-t border-b py-3">
+                              <div className="flex justify-between items-center mb-2">
+                                <p className="text-sm font-medium">Payment Plan:</p>
+                                <Select
+                                  value={selectedInstallments.toString()}
+                                  onValueChange={(value) => handlePaymentPlanChange(
+                                    service.service_id, 
+                                    'prepaid', 
+                                    passLevel, 
+                                    parseInt(value)
+                                  )}
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue placeholder="Installments" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="1">Pay in Full</SelectItem>
+                                    <SelectItem value="2">2 Payments</SelectItem>
+                                    <SelectItem value="3">3 Payments</SelectItem>
+                                    <SelectItem value="4">4 Payments</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              {selectedInstallments > 1 && (
+                                <div className="bg-muted p-3 rounded-md space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <p className="text-sm font-medium flex items-center">
+                                      <Calendar size={14} className="mr-1" /> Payment Schedule:
+                                    </p>
+                                    <p className="text-sm font-medium">
+                                      {formatCurrency(monthlyPrice)} × {selectedInstallments}
+                                    </p>
+                                  </div>
+                                  <div className="space-y-1 pt-1 border-t border-border/30">
+                                    {paymentDates.map((date, index) => (
+                                      <div key={index} className="flex justify-between text-xs">
+                                        <span>
+                                          Payment {index + 1}: {format(date, 'MMM d, yyyy')}
+                                        </span>
+                                        <span className={index === 0 ? "font-medium" : ""}>
+                                          {formatCurrency(monthlyPrice)}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                             
                             <Button 
@@ -194,9 +285,16 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                                 passLevel,
                                 option.totalPassCost
                               )}
-                              variant={isPassSelected(service.service_id, 'prepaid', passLevel) ? "secondary" : "default"}
+                              variant={isSelected ? "secondary" : "default"}
                             >
-                              {isPassSelected(service.service_id, 'prepaid', passLevel) ? "Selected" : "Select This Pass"}
+                              {isSelected 
+                                ? selectedInstallments > 1 
+                                  ? `Selected • ${formatCurrency(monthlyPrice)}/mo`
+                                  : "Selected"
+                                : selectedInstallments > 1 
+                                  ? `Select • ${formatCurrency(monthlyPrice)}/mo`
+                                  : "Select This Pass"
+                              }
                             </Button>
                           </CardContent>
                         </Card>
@@ -213,9 +311,13 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {unlimitedOptions.map(option => {
                       const passLevel = option.passTypeCode;
+                      const selectedInstallments = getSelectedInstallments(service.service_id, 'unlimited', passLevel);
+                      const monthlyPrice = calculateMonthlyPrice(option.totalPassPrice, selectedInstallments);
+                      const isSelected = isPassSelected(service.service_id, 'unlimited', passLevel);
+                      const paymentDates = getPaymentDates(selectedInstallments);
                       
                       return (
-                        <Card key={passLevel} className={`overflow-hidden ${isPassSelected(service.service_id, 'unlimited', passLevel) ? 'border-primary' : ''}`}>
+                        <Card key={passLevel} className={`overflow-hidden ${isSelected ? 'border-primary' : ''}`}>
                           {isBestValue(option) && (
                             <div className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 text-center">
                               BEST VALUE
@@ -265,10 +367,63 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                             </div>
                             
                             <div className="mb-4">
-                              <p className="font-medium">Total Pass Cost: {formatCurrency(option.totalPassPrice)}</p>
+                              <div className="flex justify-between">
+                                <p className="font-medium">Total Pass Cost:</p>
+                                <p className="font-medium">{formatCurrency(option.totalPassPrice)}</p>
+                              </div>
                               <p className="text-sm text-muted-foreground">
                                 Unlimited visits for {option.durationMonths} months (approx. {option.estimatedVisits} visits)
                               </p>
+                            </div>
+                            
+                            {/* Installment Selector */}
+                            <div className="mb-4 border-t border-b py-3">
+                              <div className="flex justify-between items-center mb-2">
+                                <p className="text-sm font-medium">Payment Plan:</p>
+                                <Select
+                                  value={selectedInstallments.toString()}
+                                  onValueChange={(value) => handlePaymentPlanChange(
+                                    service.service_id, 
+                                    'unlimited', 
+                                    passLevel, 
+                                    parseInt(value)
+                                  )}
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue placeholder="Installments" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="1">Pay in Full</SelectItem>
+                                    <SelectItem value="2">2 Payments</SelectItem>
+                                    <SelectItem value="3">3 Payments</SelectItem>
+                                    <SelectItem value="4">4 Payments</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              {selectedInstallments > 1 && (
+                                <div className="bg-muted p-3 rounded-md space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <p className="text-sm font-medium flex items-center">
+                                      <Calendar size={14} className="mr-1" /> Payment Schedule:
+                                    </p>
+                                    <p className="text-sm font-medium">
+                                      {formatCurrency(monthlyPrice)} × {selectedInstallments}
+                                    </p>
+                                  </div>
+                                  <div className="space-y-1 pt-1 border-t border-border/30">
+                                    {paymentDates.map((date, index) => (
+                                      <div key={index} className="flex justify-between text-xs">
+                                        <span>
+                                          Payment {index + 1}: {format(date, 'MMM d, yyyy')}
+                                        </span>
+                                        <span className={index === 0 ? "font-medium" : ""}>
+                                          {formatCurrency(monthlyPrice)}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                             
                             <Button 
@@ -279,9 +434,16 @@ export default function PassRecommendations({ onBack, onContinue }: PassRecommen
                                 passLevel,
                                 option.totalPassPrice
                               )}
-                              variant={isPassSelected(service.service_id, 'unlimited', passLevel) ? "secondary" : "default"}
+                              variant={isSelected ? "secondary" : "default"}
                             >
-                              {isPassSelected(service.service_id, 'unlimited', passLevel) ? "Selected" : "Select This Pass"}
+                              {isSelected 
+                                ? selectedInstallments > 1 
+                                  ? `Selected • ${formatCurrency(monthlyPrice)}/mo`
+                                  : "Selected"
+                                : selectedInstallments > 1 
+                                  ? `Select • ${formatCurrency(monthlyPrice)}/mo`
+                                  : "Select This Pass"
+                              }
                             </Button>
                           </CardContent>
                         </Card>
