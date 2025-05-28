@@ -32,7 +32,9 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Set up environment variables (see Environment Setup section below)
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
@@ -49,6 +51,31 @@ npm run dev
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## Environment Setup
+
+This project requires environment variables to function properly. Follow these steps:
+
+1. **Copy the environment template:**
+   ```sh
+   cp .env.example .env
+   ```
+
+2. **Edit the `.env` file with your actual values:**
+   ```sh
+   # Required: Your Zenoti API key
+   VITE_ZENOTI_API_KEY=your_actual_api_key_here
+   
+   # Optional: Custom API base URL (defaults to https://api.zenoti.com/v1)
+   VITE_ZENOTI_API_BASE_URL=https://api.zenoti.com/v1
+   ```
+
+3. **Get your Zenoti API key:**
+   - Log into your Zenoti dashboard
+   - Navigate to API settings
+   - Generate or copy your API key
+
+⚠️ **Important:** Never commit your `.env` file to version control. It's already included in `.gitignore`.
 
 ## What technologies are used for this project?
 

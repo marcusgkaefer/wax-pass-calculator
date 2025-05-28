@@ -1,21 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, Search, Compass } from 'lucide-react';
+import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import { MapPin, Search, Compass, RefreshCw, Clock, Phone, ExternalLink, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useWaxPass } from '@/lib/WaxPassContext';
-import { mockCities, fetchWaxCentersForCity, fetchNearestWaxCenter } from '@/lib/waxPassCalculations';
+import { ZenotiApiService, ZenotiCenter } from '@/lib/zenotiApi';
 
-interface City {
-  id: string;
-  name: string;
-  state: string;
-}
-
-interface WaxCenter {
-  id: string;
-  display_name: string;
-}
+// Extended type for centers with distance
+type ZenotiCenterWithDistance = ZenotiCenter & { distance?: number };
 
 interface LocationSelectionProps {
   onContinue: () => void;
@@ -24,20 +17,123 @@ interface LocationSelectionProps {
 const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => {
   const { selectedWaxCenter, setSelectedWaxCenter } = useWaxPass();
   const [searchQuery, setSearchQuery] = useState("");
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [selectedCity, setSelectedCity] = useState<City | null>(null);
-  const [waxCenters, setWaxCenters] = useState<WaxCenter[]>([]);
+  const [searchChips, setSearchChips] = useState<string[]>([]);
+  const [centers, setCenters] = useState<ZenotiCenter[]>([]);
+  const [filteredCenters, setFilteredCenters] = useState<ZenotiCenterWithDistance[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [focusedChipIndex, setFocusedChipIndex] = useState<number>(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Filter cities based on search query
-  const filteredCities = mockCities.filter(city =>
-    `${city.name} ${city.state}`.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Load all centers on component mount
+  useEffect(() => {
+    loadAllCenters();
+  }, []);
+
+  // Filter centers based on search chips
+  useEffect(() => {
+    if (searchChips.length === 0) {
+      setFilteredCenters([]);
+      setHasSearched(false);
+      return;
+    }
+
+    const filtered = centers.filter(center => {
+      // AND logic: center must match ALL search chips
+      return searchChips.every(chip => {
+        const searchTerm = chip.toLowerCase();
+        return (
+          center.name.toLowerCase().includes(searchTerm) ||
+          center.display_name.toLowerCase().includes(searchTerm) ||
+          center.address_info.city.toLowerCase().includes(searchTerm) ||
+          center.state.name.toLowerCase().includes(searchTerm) ||
+          `${center.address_info.city}, ${center.state.name}`.toLowerCase().includes(searchTerm) ||
+          center.address_info.zip_code.includes(searchTerm)
+        );
+      });
+    });
+
+    setFilteredCenters(filtered.map(center => ({ ...center, distance: undefined } as ZenotiCenterWithDistance)));
+    setHasSearched(true);
+  }, [searchChips, centers]);
+
+  const addSearchChip = (value: string) => {
+    const trimmedValue = value.trim();
+    if (trimmedValue && !searchChips.includes(trimmedValue)) {
+      setSearchChips(prev => [...prev, trimmedValue]);
+      setSearchQuery("");
+      setFocusedChipIndex(-1);
+    }
+  };
+
+  const removeSearchChip = (index: number) => {
+    setSearchChips(prev => prev.filter((_, i) => i !== index));
+    setFocusedChipIndex(-1);
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      if (searchQuery.trim()) {
+        addSearchChip(searchQuery);
+      }
+    } else if (e.key === 'Backspace') {
+      if (!searchQuery && searchChips.length > 0) {
+        if (focusedChipIndex === -1) {
+          // Focus on the last chip
+          setFocusedChipIndex(searchChips.length - 1);
+        } else {
+          // Remove the focused chip
+          removeSearchChip(focusedChipIndex);
+        }
+      } else {
+        setFocusedChipIndex(-1);
+      }
+    } else if (e.key === 'ArrowLeft' && !searchQuery) {
+      e.preventDefault();
+      if (focusedChipIndex === -1 && searchChips.length > 0) {
+        setFocusedChipIndex(searchChips.length - 1);
+      } else if (focusedChipIndex > 0) {
+        setFocusedChipIndex(focusedChipIndex - 1);
+      }
+    } else if (e.key === 'ArrowRight' && !searchQuery) {
+      e.preventDefault();
+      if (focusedChipIndex < searchChips.length - 1) {
+        setFocusedChipIndex(focusedChipIndex + 1);
+      } else {
+        setFocusedChipIndex(-1);
+        inputRef.current?.focus();
+      }
+    } else if (e.key === 'Delete' && focusedChipIndex !== -1) {
+      e.preventDefault();
+      removeSearchChip(focusedChipIndex);
+    } else {
+      setFocusedChipIndex(-1);
+    }
+  };
+
+  const loadAllCenters = async (forceRefresh = false) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const allCenters = await ZenotiApiService.getAllCenters(forceRefresh);
+      setCenters(allCenters);
+      console.log(`Loaded ${allCenters.length} centers`);
+    } catch (err) {
+      console.error("Error loading centers:", err);
+      setError("Failed to load wax centers. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleGeolocation = () => {
     setError(null);
-    setIsLoading(true);
+    setIsLoadingLocation(true);
 
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -46,128 +142,142 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
             const { latitude, longitude } = position.coords;
             console.log("Location accessed:", latitude, longitude);
             
-            const nearestCenter = await fetchNearestWaxCenter(latitude, longitude);
-            
-            if (nearestCenter) {
-              setSelectedWaxCenter(nearestCenter);
-              setWaxCenters([nearestCenter]);
+            // Calculate distances and find nearest centers
+            const centersWithDistance = centers.map(center => {
+              // Simple distance calculation (not perfectly accurate but good enough for demo)
+              const lat1 = latitude;
+              const lon1 = longitude;
+              const lat2 = center.latitude || 0;
+              const lon2 = center.longitude || 0;
+              
+              const distance = Math.sqrt(
+                Math.pow(lat2 - lat1, 2) + Math.pow(lon2 - lon1, 2)
+              ) * 69; // Rough miles conversion
+              
+              return { ...center, distance };
+            }).sort((a, b) => (a.distance || 0) - (b.distance || 0));
+
+            if (centersWithDistance.length > 0) {
+              setFilteredCenters(centersWithDistance.slice(0, 10) as ZenotiCenterWithDistance[]);
+              setSearchChips(["Near your location"]);
+              setHasSearched(true);
             } else {
-              setError("No wax centers found near your location. Please search for a city manually.");
+              setError("No wax centers found near your location. Please search manually.");
             }
-            setIsLoading(false);
+            setIsLoadingLocation(false);
           } catch (err) {
-            console.error("Error finding nearest center:", err);
-            setError("Error finding a center near you. Please try again or search manually.");
-            setIsLoading(false);
+            console.error("Error finding nearest centers:", err);
+            setError("Error finding centers near you. Please try again or search manually.");
+            setIsLoadingLocation(false);
           }
         },
         (error) => {
           console.error("Error accessing location:", error);
           setError("Unable to access your location. Please try again or search manually.");
-          setIsLoading(false);
+          setIsLoadingLocation(false);
         }
       );
     } else {
-      setError("Geolocation is not supported by your browser. Please search for a location manually.");
-      setIsLoading(false);
+      setError("Geolocation is not supported by your browser. Please search manually.");
+      setIsLoadingLocation(false);
     }
   };
 
-  const handleCitySelect = async (city: City) => {
-    setSelectedCity(city);
-    setShowCityDropdown(false);
-    setSearchQuery(`${city.name}, ${city.state}`);
-    setIsLoading(true);
-    setError(null);
+  const handleCenterSelect = (center: ZenotiCenterWithDistance) => {
+    // Remove the distance property before setting in context
+    const { distance, ...zenotiCenter } = center;
+    setSelectedWaxCenter(zenotiCenter as ZenotiCenter);
+  };
 
-    try {
-      const centers = await fetchWaxCentersForCity(city.id);
-      setWaxCenters(centers);
-      
-      // Automatically select if there's only one wax center
-      if (centers.length === 1) {
-        setSelectedWaxCenter(centers[0]);
-      } else if (centers.length === 0) {
-        setError(`No wax centers found in ${city.name}. Please try another location.`);
+  const handleRefresh = () => {
+    loadAllCenters(true); // Force refresh
+  };
+
+  const formatWorkingHours = (workingHours: ZenotiCenter['working_hours']) => {
+    if (!workingHours || workingHours.length === 0) return "Hours not available";
+    
+    const today = new Date().getDay();
+    const todayHours = workingHours.find(h => h.day_of_week === today);
+    
+    if (todayHours) {
+      if (todayHours.is_closed) {
+        return "Closed today";
       }
-      
-      setIsLoading(false);
-    } catch (err) {
-      console.error("Error fetching wax centers:", err);
-      setError("Error fetching wax centers. Please try again.");
-      setIsLoading(false);
+      return `Open today: ${todayHours.start_time} - ${todayHours.end_time}`;
     }
+    
+    return "Hours available";
   };
-
-  const handleWaxCenterSelect = (waxCenter: WaxCenter) => {
-    setSelectedWaxCenter(waxCenter);
-  };
-
-  // If there's already a selected wax center, populate the UI accordingly
-  useEffect(() => {
-    if (selectedWaxCenter && waxCenters.length === 0) {
-      setWaxCenters([selectedWaxCenter]);
-    }
-  }, [selectedWaxCenter, waxCenters.length]);
 
   return (
-    <div className="max-w-xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Select Your Wax Center</h2>
+    <div className="max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Select Your Wax Center</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
       
       <div className="mb-8">
-        <div className="relative mb-4">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Input
-                type="text"
-                placeholder="Search for a city..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowCityDropdown(true);
-                }}
-                onFocus={() => setShowCityDropdown(true)}
-                className="w-full pl-10"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <div className="flex gap-2 mb-4">
+          <div className="relative flex-1">
+            <div className="relative border rounded-md bg-white">
+              <div className="flex flex-wrap items-center gap-1 p-2 min-h-[2.5rem]">
+                {searchChips.map((chip, index) => (
+                  <div
+                    key={index}
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-sm font-medium transition-colors ${
+                      focusedChipIndex === index
+                        ? 'bg-primary text-primary-foreground ring-2 ring-primary/50'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {chip}
+                    <button
+                      onClick={() => removeSearchChip(index)}
+                      className="ml-1 hover:bg-black/10 rounded-full p-0.5 transition-colors"
+                      type="button"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                <div className="relative flex-1 min-w-[200px]">
+                  <Input
+                    ref={inputRef}
+                    type="text"
+                    placeholder={searchChips.length === 0 ? "Search by city, state, zip code, or center name..." : "Add another filter..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="border-0 shadow-none focus-visible:ring-0 p-0 h-auto"
+                  />
+                  <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+                </div>
+              </div>
             </div>
-            <Button
-              variant="outline"
-              onClick={handleGeolocation}
-              className="flex items-center gap-2"
-              disabled={isLoading}
-            >
-              <Compass className="h-4 w-4" />
-              Near Me
-            </Button>
+            {searchChips.length > 0 && (
+              <div className="mt-2 text-xs text-gray-500">
+                Press Enter or Tab to add filters • Use arrow keys to navigate • Backspace to remove
+              </div>
+            )}
           </div>
-
-          {showCityDropdown && searchQuery && (
-            <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-auto">
-              <CardContent className="p-0">
-                {filteredCities.length > 0 ? (
-                  <ul>
-                    {filteredCities.map((city) => (
-                      <li
-                        key={city.id}
-                        className="px-4 py-3 cursor-pointer hover:bg-gray-50"
-                        onClick={() => handleCitySelect(city)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          <span>
-                            {city.name}, {city.state}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="px-4 py-3 text-gray-500">No cities found</div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          <Button
+            variant="outline"
+            onClick={handleGeolocation}
+            className="flex items-center gap-2"
+            disabled={isLoadingLocation || isLoading}
+          >
+            <Compass className={`h-4 w-4 ${isLoadingLocation ? 'animate-spin' : ''}`} />
+            Near Me
+          </Button>
         </div>
 
         {error && (
@@ -177,60 +287,120 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
         )}
 
         {isLoading && (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
-            <span className="ml-2">Searching...</span>
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
+            <span className="ml-3 text-lg">Loading wax centers...</span>
           </div>
         )}
 
-        {selectedCity && waxCenters.length > 0 && !isLoading && (
-          <div className="mt-6">
-            <h3 className="font-medium mb-3">Wax Centers in {selectedCity.name}</h3>
-            <div className="space-y-2">
-              {waxCenters.map((center) => (
-                <div
+        {!isLoading && hasSearched && filteredCenters.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">
+              No wax centers found matching all filters: {searchChips.map(chip => `"${chip}"`).join(', ')}
+            </p>
+            <p className="text-sm text-gray-400">Try removing some filters or searching for different terms</p>
+          </div>
+        )}
+
+        {!isLoading && hasSearched && filteredCenters.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium">
+                Found {filteredCenters.length} center{filteredCenters.length !== 1 ? 's' : ''} matching all filters
+              </h3>
+              {searchChips.includes("Near your location") && (
+                <Badge variant="secondary">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Sorted by distance
+                </Badge>
+              )}
+            </div>
+            
+            <div className="grid gap-4 md:grid-cols-2">
+              {filteredCenters.map((center) => (
+                <Card
                   key={center.id}
-                  className={`p-3 border rounded-md cursor-pointer transition-colors 
-                    ${
-                      selectedWaxCenter?.id === center.id
-                        ? "border-primary bg-primary/5"
-                        : "hover:bg-gray-50"
-                    }`}
-                  onClick={() => handleWaxCenterSelect(center)}
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    selectedWaxCenter?.id === center.id
+                      ? "ring-2 ring-primary bg-primary/5"
+                      : "hover:bg-gray-50"
+                  }`}
+                  onClick={() => handleCenterSelect(center)}
                 >
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <span>{center.display_name}</span>
-                  </div>
-                </div>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-lg font-semibold">
+                        {center.display_name}
+                      </CardTitle>
+                      {selectedWaxCenter?.id === center.id && (
+                        <Badge className="ml-2">Selected</Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-gray-600">
+                          <div>{center.address_info.address1}</div>
+                          {center.address_info.address2 && (
+                            <div>{center.address_info.address2}</div>
+                          )}
+                          <div>
+                            {center.address_info.city}, {center.state.name} {center.address_info.zip_code}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {center.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm text-gray-600">{center.phone}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          {formatWorkingHours(center.working_hours)}
+                        </span>
+                      </div>
+                      
+                      {/* Distance if available */}
+                      {'distance' in center && center.distance !== undefined && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-primary" />
+                          <span className="text-sm text-primary font-medium">
+                            ~{Math.round(center.distance)} miles away
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
         )}
 
-        {/* Show when we have wax centers but no city (from geolocation) */}
-        {!selectedCity && waxCenters.length > 0 && selectedWaxCenter && !isLoading && (
-          <div className="mt-6">
-            <h3 className="font-medium mb-3">Nearest Wax Center</h3>
-            <div className="p-3 border rounded-md border-primary bg-primary/5">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <span>{selectedWaxCenter.display_name}</span>
-              </div>
-            </div>
+        {!hasSearched && !isLoading && (
+          <div className="text-center py-12">
+            <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 mb-2">Start by searching for your city or using location</p>
+            <p className="text-sm text-gray-400">
+              Type search terms and press Enter or Tab to add filters
+            </p>
           </div>
         )}
       </div>
 
-      <div className="flex justify-end">
-        <Button
-          onClick={onContinue}
-          disabled={!selectedWaxCenter}
-          className="px-6"
-        >
-          Continue
-        </Button>
-      </div>
+      {selectedWaxCenter && (
+        <div className="flex justify-center">
+          <Button onClick={onContinue} size="lg" className="px-8">
+            Continue to Service Selection
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

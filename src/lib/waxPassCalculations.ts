@@ -1,3 +1,5 @@
+import { ZenotiApiService, ZenotiService } from './zenotiApi';
+
 // Define WaxService type directly here instead of importing it
 export interface WaxService {
   service_id: string;
@@ -248,200 +250,255 @@ export interface ApiService {
 }
 
 /**
- * Mock function to fetch services for a selected wax center
+ * Fetch services for a selected wax center from Zenoti API
  */
-export const fetchServicesForWaxCenter = (
+export const fetchServicesForWaxCenter = async (
   waxCenterId: string
 ): Promise<WaxService[]> => {
-  return new Promise((resolve) => {
-    // Mock API response
-    const mockApiResponse: ApiServiceResponse = {
-      "services": [
-        {
-          "id": "71265869-8380-4c46-9d32-642c244dc402",
-          "code": "AF",
-          "name": "Arms (Full)",
-          "description": "Includes the entire length of the arms. Also includes the hands and fingers. (Does not include shoulders.)\r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 55.0000
-          }
-        },
-        {
-          "id": "7267d1b6-e54d-4efc-9783-14c32125d9ab",
-          "code": "AH",
-          "name": "Arms (Half)",
-          "description": "Includes either the upper or lower arms. Upper arms include everything from the elbows up to the shoulders (does not include the shoulders.) Lower arms include everything from the elbows down, including hands and fingers. \r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 47.0000
-          }
-        },
-        {
-          "id": "df1edae9-8ff2-4018-9c06-f0cbcea62632",
-          "code": "FB",
-          "name": "Back (Full)",
-          "description": "Includes the entire length of the back. (Does not include shoulders.)\r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 80.0000
-          }
-        },
-        {
-          "id": "644150be-b2d7-4b58-8de8-a07ecb08a20c",
-          "code": "BL",
-          "name": "Back (Lower)",
-          "description": "Includes the lower third of the back. \r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 30.0000
-          }
-        },
-        {
-          "id": "b8bd79ae-9537-4bc6-abdc-056b1c231bd3",
-          "code": "CHF",
-          "name": "Chest (Full)",
-          "description": "Includes the pectoral muscles starting at the collar bone. Also includes the nipples (Does not include shoulders or stomach.)\r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 41.0000
-          }
-        },
-        {
-          "id": "62dae9b4-283f-468f-9239-d1b7a3ddb94a",
-          "code": "CN",
-          "name": "Chin",
-          "description": "Includes the chin and lower lip. ",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 19.0000
-          }
-        },
-        {
-          "id": "dfffcf78-19a7-46c4-88a6-6f1a8ad7f520",
-          "code": "EBT",
-          "name": "Eyebrow Tint",
-          "description": "A semi-permanent eyebrow tinting that adheres even to the tiniest hairs around the brow, delivering a fuller, bolder brow look that lasts approximately 3 weeks. *must be 16 years or older to receive this service.",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 20.0000
-          }
-        },
-        {
-          "id": "b495be08-156b-476f-9505-1a60b739f079",
-          "code": "EB",
-          "name": "Eyebrows",
-          "description": "Includes eyebrow consultation and shaping complete with waxing, trimming, and tweezing. Also includes filling in the brows with our EWC brow products.",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 28.0000
-          }
-        },
-        {
-          "id": "97ae898e-e0c8-485d-beb4-fc8a725a1e86",
-          "code": "FF",
-          "name": "Full Face",
-          "description": "Includes the hairline, eyebrows, nose, sideburns, cheeks, upper and lower lip, chin, and front of the neck from the ears forward. (Does not include back of neck.)",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 70.0000
-          }
-        },
-        {
-          "id": "d5d97023-c67b-4086-ac5f-0ae891d8d6bd",
-          "code": "LF",
-          "name": "Legs (Full)",
-          "description": "Includes upper and lower legs. Also includes the knees, feet, and toes.\r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 88.0000
-          }
-        },
-        {
-          "id": "54e998b0-6480-49d5-a051-4735cde0be6e",
-          "code": "LL",
-          "name": "Legs (Lower)",
-          "description": "Includes the knees, lower legs, feet, and toes.\r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 56.0000
-          }
-        },
-        {
-          "id": "eab40722-7943-4f90-9c52-7c08e0720719",
-          "code": "LP",
-          "name": "Upper Lip",
-          "description": "Includes the upper lip. (Does not include the lower lip.)",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 18.0000
-          }
-        },
-        {
-          "id": "ae714604-5160-428b-a12e-84d559c8dd43",
-          "code": "BKB",
-          "name": "Brazilian - (V)",
-          "description": "For guests with a vagina. Includes the bikini line, a butt strip between the cheeks, and hair off the front—we'll leave as much or as little as you want!\r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 77.0000
-          }
-        },
-        {
-          "id": "264f6fd0-9e59-420f-bcf3-431e91d0d12c",
-          "code": "BKL",
-          "name": "Bikini Line - (V)",
-          "description": "For guests with a vagina. Includes four finger-widths off the front starting at the natural bikini line, and two finger-widths starting from the top. (Does not include inner thigh.)\r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 53.0000
-          }
-        },
-        {
-          "id": "c6b5a560-9cf7-4a5c-bcd7-473fe21548e3",
-          "code": "UA",
-          "name": "Underarms",
-          "description": "Includes the underarms.\r\n",
-          "price_info": {
-            "currency_id": 148,
-            "sale_price": 29.0000
-          }
-        }
-      ],
-      "page_info": null
-    };
-
-    // Convert API response to our WaxService format
-    const mappedServices: WaxService[] = mockApiResponse.services.map(apiService => {
-      // Determine category based on service name (simplified approach)
+  try {
+    console.log(`Fetching services for center: ${waxCenterId}`);
+    
+    // Fetch services from Zenoti API
+    const zenotiServices = await ZenotiApiService.getCenterServices(waxCenterId);
+    
+    // Map Zenoti services to our WaxService format
+    const mappedServices: WaxService[] = zenotiServices.map((zenotiService: ZenotiService) => {
+      // Determine category based on service name and additional_info
       let category = "Other";
-      if (apiService.name.includes("Eyebrow") || apiService.name.includes("Lip") || 
-          apiService.name.includes("Chin") || apiService.name.includes("Full Face")) {
-        category = "Face";
-      } else if (apiService.name.includes("Brazilian") || apiService.name.includes("Bikini")) {
-        category = "Bikini Area";
-      } else if (apiService.name.includes("Legs") || apiService.name.includes("Arms") || 
-                apiService.name.includes("Back") || apiService.name.includes("Chest") || 
-                apiService.name.includes("Underarms")) {
-        category = "Body";
+      
+      // Use category from API if available
+      if (zenotiService.additional_info?.category?.name) {
+        category = zenotiService.additional_info.category.name;
+      } else {
+        // Fallback to service name analysis
+        const serviceName = zenotiService.name.toLowerCase();
+        if (serviceName.includes("eyebrow") || serviceName.includes("lip") || 
+            serviceName.includes("chin") || serviceName.includes("full face") ||
+            serviceName.includes("face")) {
+          category = "Face";
+        } else if (serviceName.includes("brazilian") || serviceName.includes("bikini")) {
+          category = "Bikini Area";
+        } else if (serviceName.includes("legs") || serviceName.includes("arms") || 
+                  serviceName.includes("back") || serviceName.includes("chest") || 
+                  serviceName.includes("underarms")) {
+          category = "Body";
+        }
       }
 
+      // Determine pass eligibility based on service characteristics
+      const isPopularService = ["eyebrows", "brazilian", "bikini", "underarms", "full face", "lip"].some(
+        term => zenotiService.name.toLowerCase().includes(term)
+      );
+
       return {
-        service_id: apiService.id,
-        service_name: apiService.name,
+        service_id: zenotiService.id,
+        service_name: zenotiService.catalog_info?.display_name || zenotiService.name,
         category: category,
-        standard_price: apiService.price_info.sale_price,
-        description: apiService.description,
-        is_eligible_for_prepaid_pass: true,
-        is_eligible_for_unlimited_pass: ["Eyebrows", "Brazilian", "Bikini Line", "Underarms", "Full Face"].some(
-          name => apiService.name.includes(name)
-        )
+        standard_price: zenotiService.price_info.sale_price,
+        description: zenotiService.description || zenotiService.additional_info?.html_description || '',
+        is_eligible_for_prepaid_pass: true, // Most services are eligible
+        is_eligible_for_unlimited_pass: isPopularService, // Popular services eligible for unlimited
+        prepaid_pass_rules_applicable: [], // Will be populated by other functions
+        unlimited_pass_options_available: [] // Will be populated by other functions
       };
     });
 
-    // Simulate network delay
-    setTimeout(() => {
-      resolve(mappedServices);
-    }, 600);
+    console.log(`Successfully mapped ${mappedServices.length} services for center ${waxCenterId}`);
+    return mappedServices;
+    
+  } catch (error) {
+    console.error(`Error fetching services for center ${waxCenterId}:`, error);
+    
+    // Fallback to mock data if API fails
+    console.log('Falling back to mock data due to API error');
+    return getMockServices();
+  }
+};
+
+/**
+ * Mock services as fallback data
+ */
+const getMockServices = (): WaxService[] => {
+  const mockApiResponse: ApiServiceResponse = {
+    "services": [
+      {
+        "id": "71265869-8380-4c46-9d32-642c244dc402",
+        "code": "AF",
+        "name": "Arms (Full)",
+        "description": "Includes the entire length of the arms. Also includes the hands and fingers. (Does not include shoulders.)\r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 55.0000
+        }
+      },
+      {
+        "id": "7267d1b6-e54d-4efc-9783-14c32125d9ab",
+        "code": "AH",
+        "name": "Arms (Half)",
+        "description": "Includes either the upper or lower arms. Upper arms include everything from the elbows up to the shoulders (does not include the shoulders.) Lower arms include everything from the elbows down, including hands and fingers. \r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 47.0000
+        }
+      },
+      {
+        "id": "df1edae9-8ff2-4018-9c06-f0cbcea62632",
+        "code": "FB",
+        "name": "Back (Full)",
+        "description": "Includes the entire length of the back. (Does not include shoulders.)\r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 80.0000
+        }
+      },
+      {
+        "id": "644150be-b2d7-4b58-8de8-a07ecb08a20c",
+        "code": "BL",
+        "name": "Back (Lower)",
+        "description": "Includes the lower third of the back. \r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 30.0000
+        }
+      },
+      {
+        "id": "b8bd79ae-9537-4bc6-abdc-056b1c231bd3",
+        "code": "CHF",
+        "name": "Chest (Full)",
+        "description": "Includes the pectoral muscles starting at the collar bone. Also includes the nipples (Does not include shoulders or stomach.)\r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 41.0000
+        }
+      },
+      {
+        "id": "62dae9b4-283f-468f-9239-d1b7a3ddb94a",
+        "code": "CN",
+        "name": "Chin",
+        "description": "Includes the chin and lower lip. ",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 19.0000
+        }
+      },
+      {
+        "id": "dfffcf78-19a7-46c4-88a6-6f1a8ad7f520",
+        "code": "EBT",
+        "name": "Eyebrow Tint",
+        "description": "A semi-permanent eyebrow tinting that adheres even to the tiniest hairs around the brow, delivering a fuller, bolder brow look that lasts approximately 3 weeks. *must be 16 years or older to receive this service.",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 20.0000
+        }
+      },
+      {
+        "id": "b495be08-156b-476f-9505-1a60b739f079",
+        "code": "EB",
+        "name": "Eyebrows",
+        "description": "Includes eyebrow consultation and shaping complete with waxing, trimming, and tweezing. Also includes filling in the brows with our EWC brow products.",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 28.0000
+        }
+      },
+      {
+        "id": "97ae898e-e0c8-485d-beb4-fc8a725a1e86",
+        "code": "FF",
+        "name": "Full Face",
+        "description": "Includes the hairline, eyebrows, nose, sideburns, cheeks, upper and lower lip, chin, and front of the neck from the ears forward. (Does not include back of neck.)",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 70.0000
+        }
+      },
+      {
+        "id": "d5d97023-c67b-4086-ac5f-0ae891d8d6bd",
+        "code": "LF",
+        "name": "Legs (Full)",
+        "description": "Includes upper and lower legs. Also includes the knees, feet, and toes.\r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 88.0000
+        }
+      },
+      {
+        "id": "54e998b0-6480-49d5-a051-4735cde0be6e",
+        "code": "LL",
+        "name": "Legs (Lower)",
+        "description": "Includes the knees, lower legs, feet, and toes.\r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 56.0000
+        }
+      },
+      {
+        "id": "eab40722-7943-4f90-9c52-7c08e0720719",
+        "code": "LP",
+        "name": "Upper Lip",
+        "description": "Includes the upper lip. (Does not include the lower lip.)",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 18.0000
+        }
+      },
+      {
+        "id": "ae714604-5160-428b-a12e-84d559c8dd43",
+        "code": "BKB",
+        "name": "Brazilian - (V)",
+        "description": "For guests with a vagina. Includes the bikini line, a butt strip between the cheeks, and hair off the front—we'll leave as much or as little as you want!\r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 77.0000
+        }
+      },
+      {
+        "id": "264f6fd0-9e59-420f-bcf3-431e91d0d12c",
+        "code": "BKL",
+        "name": "Bikini Line - (V)",
+        "description": "For guests with a vagina. Includes four finger-widths off the front starting at the natural bikini line, and two finger-widths starting from the top. (Does not include inner thigh.)\r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 53.0000
+        }
+      },
+      {
+        "id": "c6b5a560-9cf7-4a5c-bcd7-473fe21548e3",
+        "code": "UA",
+        "name": "Underarms",
+        "description": "Includes the underarms.\r\n",
+        "price_info": {
+          "currency_id": 148,
+          "sale_price": 29.0000
+        }
+      }
+    ],
+    "page_info": null
+  };
+
+  // Convert mock API response to our WaxService format (same logic as before)
+  return mockApiResponse.services.map(apiService => {
+    let category = "Other";
+    if (apiService.name.includes("Eyebrow") || apiService.name.includes("Lip") || 
+        apiService.name.includes("Chin") || apiService.name.includes("Full Face")) {
+      category = "Face";
+    } else if (apiService.name.includes("Brazilian") || apiService.name.includes("Bikini")) {
+      category = "Bikini Area";
+    } else if (apiService.name.includes("Legs") || apiService.name.includes("Arms") || 
+              apiService.name.includes("Back") || apiService.name.includes("Chest") || 
+              apiService.name.includes("Underarms")) {
+      category = "Body";
+    }
+
+    return {
+      service_id: apiService.id,
+      service_name: apiService.name,
+      category: category,
+      standard_price: apiService.price_info.sale_price,
+      description: apiService.description,
+      is_eligible_for_prepaid_pass: true,
+      is_eligible_for_unlimited_pass: ["Eyebrows", "Brazilian", "Bikini Line", "Underarms", "Full Face"].some(
+        name => apiService.name.includes(name)
+      )
+    };
   });
 }; 

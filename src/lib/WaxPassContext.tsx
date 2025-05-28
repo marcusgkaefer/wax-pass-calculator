@@ -1,16 +1,11 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { WaxService, SelectedPass } from '@/data/waxPassData';
-
-// Wax Center type definition
-interface WaxCenter {
-  id: string;
-  display_name: string;
-}
+import { ZenotiCenter } from './zenotiApi';
 
 interface WaxPassContextType {
   // Selected wax center in Phase 0
-  selectedWaxCenter: WaxCenter | null;
-  setSelectedWaxCenter: (center: WaxCenter | null) => void;
+  selectedWaxCenter: ZenotiCenter | null;
+  setSelectedWaxCenter: (center: ZenotiCenter | null) => void;
   
   // Selected services in Phase 1
   selectedServices: WaxService[];
@@ -29,7 +24,7 @@ interface WaxPassContextType {
 const WaxPassContext = createContext<WaxPassContextType | undefined>(undefined);
 
 export const WaxPassProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedWaxCenter, setSelectedWaxCenter] = useState<WaxCenter | null>(null);
+  const [selectedWaxCenter, _setSelectedWaxCenter] = useState<ZenotiCenter | null>(null);
   const [selectedServices, setSelectedServices] = useState<WaxService[]>([]);
   const [selectedPasses, setSelectedPasses] = useState<SelectedPass[]>([]);
 
@@ -61,9 +56,18 @@ export const WaxPassProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const clearSelections = () => {
-    setSelectedWaxCenter(null);
+    _setSelectedWaxCenter(null);
     setSelectedServices([]);
     setSelectedPasses([]);
+  };
+
+  const setSelectedWaxCenter = (center: ZenotiCenter | null) => {
+    // Clear services and passes when center changes
+    if (center?.id !== selectedWaxCenter?.id) {
+      setSelectedServices([]);
+      setSelectedPasses([]);
+    }
+    _setSelectedWaxCenter(center);
   };
 
   return (
