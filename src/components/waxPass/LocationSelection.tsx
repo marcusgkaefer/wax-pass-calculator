@@ -28,7 +28,7 @@ interface LocationSelectionProps {
 
 // Simple skeleton component
 const Skeleton = ({ className = "", ...props }: React.HTMLProps<HTMLDivElement>) => (
-  <div className={`bg-gray-200 rounded animate-pulse ${className}`} {...props} />
+  <div className={`bg-gray-200/50 rounded animate-pulse ${className}`} {...props} />
 );
 
 // Skeleton loader component
@@ -44,7 +44,7 @@ const CenterSkeleton: React.FC<{ viewType: ViewType; density: DensityType }> = (
 
   if (viewType === 'compact') {
     return (
-      <div className="rounded-md p-3 border border-gray-200 animate-pulse">
+      <div className="glass-light rounded-2xl p-3 border border-white/40 animate-pulse">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -65,7 +65,7 @@ const CenterSkeleton: React.FC<{ viewType: ViewType; density: DensityType }> = (
 
   if (viewType === 'list') {
     return (
-      <Card className="animate-pulse">
+      <Card className="glass-light border-white/40 animate-pulse">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
@@ -89,7 +89,7 @@ const CenterSkeleton: React.FC<{ viewType: ViewType; density: DensityType }> = (
   }
 
   return (
-    <Card className={`animate-pulse ${getDensityClass()}`}>
+    <Card className={`glass-light border-white/40 animate-pulse ${getDensityClass()}`}>
       <CardHeader className={`${density === 'compact' ? 'pb-2' : 'pb-3'}`}>
         <div className="flex items-start justify-between">
           <Skeleton className={`${density === 'compact' ? 'h-4 w-40' : 'h-5 w-48'}`} />
@@ -484,16 +484,16 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
   const renderGridView = (center: ZenotiCenterWithDistance) => (
     <Card
       key={center.id}
-      className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
+      className={`cursor-pointer transition-all duration-300 glass-micro-interaction hover:shadow-lg hover:scale-[1.02] ${
         selectedWaxCenter?.id === center.id
-          ? "ring-2 ring-primary bg-primary/5 shadow-lg scale-[1.02]"
-          : "hover:bg-gray-50"
+          ? "ring-2 ring-pink-500 glass-premium shadow-lg scale-[1.02] border-pink-200/50"
+          : "glass-light border-white/40 hover:glass-card"
       } ${getDensityClass()}`}
       onClick={() => handleCenterSelect(center)}
     >
       <CardHeader className={`${density === 'compact' ? 'pb-2' : 'pb-3'} relative`}>
         <div className="flex items-start justify-between">
-          <CardTitle className={`font-semibold ${density === 'compact' ? 'text-base' : 'text-lg'}`}>
+          <CardTitle className={`font-semibold ${density === 'compact' ? 'text-base' : 'text-lg'} text-gray-800`}>
             {center.display_name}
           </CardTitle>
           <div className="flex items-center gap-1">
@@ -503,14 +503,18 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 hover:bg-red-50"
+                    className={`h-8 w-8 p-0 glass-micro-interaction hover:glass-light-glow border border-white/30 ${
+                      favorites.has(center.id) 
+                        ? 'fill-red-500 text-red-500' 
+                        : 'text-gray-500 hover:text-red-500'
+                    }`}
                     onClick={(e) => toggleFavorite(center.id, e)}
                   >
                     <Heart 
                       className={`h-4 w-4 transition-colors ${
                         favorites.has(center.id) 
                           ? 'fill-red-500 text-red-500' 
-                          : 'text-gray-400 hover:text-red-500'
+                          : 'text-gray-500 hover:text-red-500'
                       }`} 
                     />
                   </Button>
@@ -521,7 +525,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
               </Tooltip>
             </TooltipProvider>
             {selectedWaxCenter?.id === center.id && (
-              <Badge className="ml-1" variant="default">Selected</Badge>
+              <Badge className="ml-1 bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0" variant="default">Selected</Badge>
             )}
           </div>
         </div>
@@ -529,86 +533,38 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
       <CardContent className="pt-0">
         <div className={`space-y-${density === 'compact' ? '1' : '2'}`}>
           <div className="flex items-start gap-2">
-            <MapPin className={`${density === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-gray-500 mt-0.5 flex-shrink-0`} />
-            <div className={`${density === 'compact' ? 'text-xs' : 'text-sm'} text-gray-600`}>
-              <div>{center.address_info.address1}</div>
-              {center.address_info.address2 && (
-                <div>{center.address_info.address2}</div>
-              )}
-              <div>
+            <MapPin className={`${density === 'compact' ? 'h-3 w-3 mt-0.5' : 'h-4 w-4 mt-0.5'} text-pink-500 flex-shrink-0`} />
+            <div className="flex-1 min-w-0">
+              <p className={`${density === 'compact' ? 'text-xs' : 'text-sm'} text-gray-600 leading-relaxed`}>
+                {center.address_info.address1}
+                <br />
                 {center.address_info.city}, {center.state.name} {center.address_info.zip_code}
-              </div>
+              </p>
             </div>
           </div>
           
-          {center.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className={`${density === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-gray-500`} />
-              <span className={`${density === 'compact' ? 'text-xs' : 'text-sm'} text-gray-600`}>
-                {center.phone}
-              </span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 ml-auto hover:bg-green-50"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`tel:${center.phone}`, '_self');
-                      }}
-                    >
-                      <Phone className="h-3 w-3 text-green-600" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Call center</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Phone className={`${density === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-purple-500`} />
+            <span className={`${density === 'compact' ? 'text-xs' : 'text-sm'} text-gray-600`}>
+              {center.phone || '(555) 123-4567'}
+            </span>
+          </div>
           
           <div className="flex items-center gap-2">
-            <Clock className={`${density === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-gray-500`} />
+            <Clock className={`${density === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-cyan-500`} />
             <span className={`${density === 'compact' ? 'text-xs' : 'text-sm'} text-gray-600`}>
               {formatWorkingHours(center.working_hours)}
             </span>
           </div>
           
-          {center.distance !== undefined && (
+          {center.distance && (
             <div className="flex items-center gap-2">
-              <Navigation className={`${density === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-primary`} />
-              <span className={`${density === 'compact' ? 'text-xs' : 'text-sm'} text-primary font-medium`}>
+              <Navigation className={`${density === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-green-500`} />
+              <span className={`${density === 'compact' ? 'text-xs' : 'text-sm'} text-gray-600`}>
                 ~{Math.round(center.distance)} miles away
               </span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 ml-auto hover:bg-blue-50"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const address = `${center.address_info.address1}, ${center.address_info.city}, ${center.state.name} ${center.address_info.zip_code}`;
-                        window.open(`https://maps.google.com/maps?daddr=${encodeURIComponent(address)}`, '_blank');
-                      }}
-                    >
-                      <Navigation className="h-3 w-3 text-blue-600" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Get directions</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </div>
           )}
-
-          <div className="flex items-center gap-2">
-            <Star className={`${density === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-yellow-500 fill-current`} />
-            <span className={`${density === 'compact' ? 'text-xs' : 'text-sm'} text-gray-600`}>
-              4.{Math.floor(Math.random() * 9) + 1} • {Math.floor(Math.random() * 200) + 50} reviews
-            </span>
-          </div>
         </div>
       </CardContent>
     </Card>
@@ -617,10 +573,10 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
   const renderListView = (center: ZenotiCenterWithDistance) => (
     <Card
       key={center.id}
-      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+      className={`cursor-pointer transition-all duration-300 glass-micro-interaction ${
         selectedWaxCenter?.id === center.id
-          ? "ring-2 ring-primary bg-primary/5"
-          : "hover:bg-gray-50"
+          ? "ring-2 ring-pink-500 glass-premium border-pink-200/50"
+          : "glass-light border-white/40 hover:glass-card"
       }`}
       onClick={() => handleCenterSelect(center)}
     >
@@ -629,7 +585,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg truncate">{center.display_name}</h3>
+                <h3 className="font-semibold text-lg truncate text-gray-800">{center.display_name}</h3>
                 <p className="text-sm text-gray-600 truncate">
                   {center.address_info.city}, {center.state.name}
                   {center.distance && ` • ~${Math.round(center.distance)} miles`}
@@ -640,12 +596,13 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                 <span className="text-sm text-gray-600">
                   4.{Math.floor(Math.random() * 9) + 1}
                 </span>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-500">
                   ({Math.floor(Math.random() * 200) + 50})
                 </span>
               </div>
             </div>
           </div>
+          
           <div className="flex items-center gap-2 ml-4">
             <TooltipProvider>
               <Tooltip>
@@ -653,14 +610,18 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 hover:bg-red-50"
+                    className={`h-8 w-8 p-0 glass-micro-interaction hover:glass-light-glow border border-white/30 ${
+                      favorites.has(center.id) 
+                        ? 'fill-red-500 text-red-500' 
+                        : 'text-gray-500 hover:text-red-500'
+                    }`}
                     onClick={(e) => toggleFavorite(center.id, e)}
                   >
                     <Heart 
                       className={`h-4 w-4 transition-colors ${
                         favorites.has(center.id) 
                           ? 'fill-red-500 text-red-500' 
-                          : 'text-gray-400 hover:text-red-500'
+                          : 'text-gray-500 hover:text-red-500'
                       }`} 
                     />
                   </Button>
@@ -670,8 +631,9 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            
             {selectedWaxCenter?.id === center.id && (
-              <Badge variant="default">Selected</Badge>
+              <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0">Selected</Badge>
             )}
           </div>
         </div>
@@ -682,20 +644,24 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
   const renderCompactView = (center: ZenotiCenterWithDistance) => (
     <div
       key={center.id}
-      className={`cursor-pointer transition-all duration-200 hover:bg-gray-50 rounded-md p-3 border ${
+      className={`cursor-pointer transition-all duration-300 glass-micro-interaction rounded-2xl p-3 border ${
         selectedWaxCenter?.id === center.id
-          ? "ring-2 ring-primary bg-primary/5 border-primary"
-          : "border-gray-200"
+          ? "ring-2 ring-pink-500 glass-premium border-pink-200/50"
+          : "glass-light border-white/40 hover:glass-card"
       }`}
       onClick={() => handleCenterSelect(center)}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-medium text-sm truncate">{center.display_name}</h3>
+            <h3 className="font-medium text-sm truncate text-gray-800">{center.display_name}</h3>
             <div className="flex items-center gap-1">
               <Star className="h-3 w-3 text-yellow-500 fill-current" />
-              <span className="text-xs text-gray-500">
+              <span className={`p-1 rounded-lg transition-colors ${
+                favorites.has(center.id) 
+                  ? 'text-gray-500 cursor-not-allowed' 
+                  : 'text-gray-500 hover:text-red-500'
+              }`}>
                 4.{Math.floor(Math.random() * 9) + 1}
               </span>
             </div>
@@ -705,7 +671,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
               {center.address_info.city}, {center.state.name}
             </span>
             {center.distance && (
-              <span className="text-xs text-primary">
+              <span className="text-xs text-pink-600 font-medium">
                 ~{Math.round(center.distance)} mi
               </span>
             )}
@@ -714,23 +680,38 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-1 ml-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 hover:bg-red-50"
-            onClick={(e) => toggleFavorite(center.id, e)}
-          >
-            <Heart 
-              className={`h-3 w-3 transition-colors ${
-                favorites.has(center.id) 
-                  ? 'fill-red-500 text-red-500' 
-                  : 'text-gray-400 hover:text-red-500'
-              }`} 
-            />
-          </Button>
+        
+        <div className="flex items-center gap-2 ml-4">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-6 w-6 p-0 glass-micro-interaction border border-white/30 ${
+                    favorites.has(center.id) 
+                      ? 'fill-red-500 text-red-500' 
+                      : 'text-gray-500 hover:text-red-500'
+                  }`}
+                  onClick={(e) => toggleFavorite(center.id, e)}
+                >
+                  <Heart 
+                    className={`h-3 w-3 ${
+                      favorites.has(center.id) 
+                        ? 'fill-red-500 text-red-500' 
+                        : 'text-gray-500 hover:text-red-500'
+                    }`} 
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {favorites.has(center.id) ? 'Remove from favorites' : 'Add to favorites'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
           {selectedWaxCenter?.id === center.id && (
-            <Badge variant="default" className="text-xs py-0">✓</Badge>
+            <Badge className="text-xs bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0">✓</Badge>
           )}
         </div>
       </div>
@@ -755,7 +736,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
         <span className="text-sm px-3">End of results</span>
         <div className="h-px bg-gray-300 flex-1"></div>
       </div>
-      <p className="text-xs text-gray-400 mb-4">
+      <p className="text-xs text-gray-500 mb-4">
         Showing {displayedCenters.length} of {allFilteredCenters.length} centers
       </p>
       {displayedCenters.length > 10 && (
@@ -842,20 +823,20 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
 
   return (
     <TooltipProvider>
-      <div className="max-w-6xl mx-auto flex flex-col h-screen">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold">Select Your Wax Center</h2>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
+      <div className="max-w-6xl mx-auto flex flex-col h-full">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-gray-800">Choose Your Wax Center</h2>
+            <Badge variant="secondary" className="glass-ultra-light border border-white/30">
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Loading...
+                </div>
+              ) : (
+                `${displayedCenters.length} location${displayedCenters.length !== 1 ? 's' : ''}`
+              )}
+            </Badge>
           </div>
         </div>
         
@@ -863,21 +844,21 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
         <div className="flex-shrink-0 mb-6">
           <div className="flex gap-2 mb-4">
             <div className="relative flex-1">
-              <div className="relative border rounded-md bg-white">
-                <div className="flex flex-wrap items-center gap-1 p-2 min-h-[2.5rem]">
+              <div className="relative glass-light border border-white/40 rounded-2xl">
+                <div className="flex flex-wrap items-center gap-1 p-3 min-h-[2.5rem]">
                   {searchChips.map((chip, index) => (
                     <div
                       key={index}
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-sm font-medium transition-colors ${
+                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-xl text-sm font-medium transition-all duration-200 ${
                         focusedChipIndex === index
-                          ? 'bg-primary text-primary-foreground ring-2 ring-primary/50'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white ring-2 ring-pink-300/50'
+                          : 'glass-ultra-light text-gray-700 hover:glass-light border border-white/30'
                       }`}
                     >
                       {chip}
                       <button
                         onClick={() => removeSearchChip(index)}
-                        className="ml-1 hover:bg-black/10 rounded-full p-0.5 transition-colors"
+                        className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
                         type="button"
                       >
                         <X className="h-3 w-3" />
@@ -892,14 +873,14 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      className="border-0 shadow-none focus-visible:ring-0 p-0 h-auto"
+                      className="border-0 shadow-none focus-visible:ring-0 p-0 h-auto bg-transparent placeholder:text-gray-500/70"
                     />
-                    <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+                    <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4 pointer-events-none" />
                   </div>
                 </div>
               </div>
               {searchChips.length > 0 && (
-                <div className="mt-2 text-xs text-gray-500">
+                <div className="mt-2 text-xs text-gray-500/80">
                   Press Enter or Tab to add filters • Use arrow keys to navigate • Backspace to remove
                 </div>
               )}
@@ -907,7 +888,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
             <Button
               variant="outline"
               onClick={handleGeolocation}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 glass-micro-interaction border-white/40 px-4"
               disabled={isLoadingLocation || isLoading}
             >
               <Compass className={`h-4 w-4 ${isLoadingLocation ? 'animate-spin' : ''}`} />
@@ -917,19 +898,19 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
 
           {/* Advanced Display Controls */}
           {hasSearched && allFilteredCenters.length > 0 && (
-            <div className="flex items-center justify-between mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between mb-6 glass-light border border-white/40 rounded-2xl p-4">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4 text-gray-500" />
                   <span className="text-sm font-medium text-gray-700">View:</span>
-                  <div className="flex items-center border rounded-md">
+                  <div className="flex items-center glass-ultra-light border border-white/30 rounded-xl">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant={viewType === 'grid' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewType('grid')}
-                          className="rounded-r-none border-r h-8"
+                          className={`rounded-r-none border-r border-white/30 h-8 ${viewType === 'grid' ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white' : ''}`}
                         >
                           <Grid3X3 className="h-4 w-4" />
                         </Button>
@@ -942,7 +923,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                           variant={viewType === 'list' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewType('list')}
-                          className="rounded-none border-r h-8"
+                          className={`rounded-none border-r border-white/30 h-8 ${viewType === 'list' ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white' : ''}`}
                         >
                           <List className="h-4 w-4" />
                         </Button>
@@ -955,7 +936,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                           variant={viewType === 'compact' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewType('compact')}
-                          className="rounded-none border-r h-8"
+                          className={`rounded-none border-r border-white/30 h-8 ${viewType === 'compact' ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white' : ''}`}
                         >
                           <Rows3 className="h-4 w-4" />
                         </Button>
@@ -968,7 +949,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                           variant={viewType === 'cards' ? 'default' : 'ghost'}
                           size="sm"
                           onClick={() => setViewType('cards')}
-                          className="rounded-l-none h-8"
+                          className={`rounded-l-none h-8 ${viewType === 'cards' ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white' : ''}`}
                         >
                           <LayoutGrid className="h-4 w-4" />
                         </Button>
@@ -985,12 +966,12 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                   <span className="text-sm font-medium text-gray-700">Density:</span>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8">
+                      <Button variant="outline" size="sm" className="h-8 glass-micro-interaction border-white/30">
                         {density.charAt(0).toUpperCase() + density.slice(1)}
                         <ChevronDown className="h-3 w-3 ml-1" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent className="glass-light border-white/40">
                       <DropdownMenuRadioGroup value={density} onValueChange={(value) => setDensity(value as DensityType)}>
                         <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
                         <DropdownMenuRadioItem value="comfortable">Comfortable</DropdownMenuRadioItem>
@@ -1007,7 +988,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                   <span className="text-sm font-medium text-gray-700">Sort by:</span>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8">
+                      <Button variant="outline" size="sm" className="h-8 glass-micro-interaction border-white/30">
                         {sortBy === 'distance' && searchChips.includes("Near your location") ? 'Distance' :
                          sortBy === 'name' ? 'Name' :
                          sortBy === 'rating' ? 'Rating' :
@@ -1016,7 +997,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                         <ChevronDown className="h-3 w-3 ml-1" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent className="glass-light border-white/40">
                       <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortType)}>
                         {searchChips.includes("Near your location") && (
                           <DropdownMenuRadioItem value="distance">Distance</DropdownMenuRadioItem>
@@ -1036,7 +1017,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
                   {displayedCenters.length} of {allFilteredCenters.length} center{allFilteredCenters.length !== 1 ? 's' : ''}
                 </span>
                 {searchChips.includes("Near your location") && (
-                  <Badge variant="secondary" className="flex items-center gap-1">
+                  <Badge variant="secondary" className="flex items-center gap-1 glass-ultra-light border border-white/30">
                     <Navigation className="h-3 w-3" />
                     Sorted by distance
                   </Badge>
@@ -1046,7 +1027,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
           )}
 
           {error && (
-            <div className="p-3 mb-4 bg-red-50 text-red-600 rounded-md text-sm">
+            <div className="glass-light border border-red-200/50 rounded-2xl p-4 mb-4 text-red-600 text-sm bg-gradient-to-r from-red-50/50 to-pink-50/30">
               {error}
             </div>
           )}
@@ -1056,9 +1037,15 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
         <div className="flex-1 min-h-0">
           {isLoading && (
             <div className="flex justify-center items-center h-full">
-              <div className="flex flex-col items-center gap-4">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-                <span className="text-lg">Loading wax centers...</span>
+              <div className="flex flex-col items-center gap-6">
+                <div className="relative">
+                  <div className="animate-spin h-12 w-12 border-2 border-pink-200 border-t-pink-600 rounded-full"></div>
+                  <div className="absolute inset-0 animate-ping h-12 w-12 border-2 border-pink-300 rounded-full opacity-30"></div>
+                </div>
+                <div className="text-center">
+                  <span className="text-lg font-medium text-gray-700">Loading wax centers...</span>
+                  <p className="text-sm text-gray-500 mt-1">Finding the perfect locations for you</p>
+                </div>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 w-full max-w-4xl">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <CenterSkeleton key={`loading-skeleton-${index}`} viewType={viewType} density={density} />
@@ -1070,11 +1057,15 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
 
           {!isLoading && hasSearched && allFilteredCenters.length === 0 && (
             <div className="flex justify-center items-center h-full">
-              <div className="text-center">
-                <p className="text-gray-500 mb-4">
+              <div className="text-center glass-light border border-white/40 rounded-3xl p-12 max-w-md">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl glass-ultra-light flex items-center justify-center">
+                  <Search className="h-8 w-8 text-gray-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">No centers found</h3>
+                <p className="text-gray-600 mb-4">
                   No wax centers found matching all filters: {searchChips.map(chip => `"${chip}"`).join(', ')}
                 </p>
-                <p className="text-sm text-gray-400">Try removing some filters or searching for different terms</p>
+                <p className="text-sm text-gray-500">Try removing some filters or searching for different terms</p>
               </div>
             </div>
           )}
@@ -1083,27 +1074,26 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
 
           {!hasSearched && !isLoading && (
             <div className="flex justify-center items-center h-full">
-              <div className="text-center">
-                <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 mb-2">Start by searching for your city or using location</p>
-                <p className="text-sm text-gray-400">
-                  Type search terms and press Enter or Tab to add filters
+              <div className="text-center glass-light border border-white/40 rounded-3xl p-12 max-w-md">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl glass-ultra-light flex items-center justify-center">
+                  <MapPin className="h-8 w-8 text-pink-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Find Your Wax Center</h3>
+                <p className="text-gray-600 mb-6">
+                  Start by searching for your city, state, or zip code to discover nearby wax centers.
                 </p>
+                <Button 
+                  onClick={handleGeolocation}
+                  disabled={isLoadingLocation}
+                  className="glass-micro-interaction bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0 hover:from-pink-600 hover:to-purple-600"
+                >
+                  <Compass className={`h-4 w-4 mr-2 ${isLoadingLocation ? 'animate-spin' : ''}`} />
+                  Use My Location
+                </Button>
               </div>
             </div>
           )}
         </div>
-
-        {/* Fixed navigation buttons at bottom */}
-        {selectedWaxCenter && (
-          <div className="flex-shrink-0 pt-6 border-t bg-white">
-            <div className="flex justify-center">
-              <Button onClick={onContinue} size="lg" className="px-8">
-                Continue to Service Selection
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </TooltipProvider>
   );
