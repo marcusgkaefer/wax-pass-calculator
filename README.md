@@ -89,7 +89,7 @@ A modern, intelligent wax pass calculator and booking platform that helps users 
    ```
 
 5. **Open your browser**
-   Navigate to `http://localhost:5173` to see the application.
+   Navigate to `http://localhost:8080/` to see the application.
 
 ## 📜 Available Scripts
 
