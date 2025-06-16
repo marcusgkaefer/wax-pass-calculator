@@ -1,100 +1,204 @@
-# Welcome to your Lovable project
+# Locate Price Smart Flow - Wax Pass Calculator
 
-## Project info
+A modern, intelligent wax pass calculator and booking platform that helps users find the best wax service packages and pricing options. Built with React, TypeScript, and modern UI components for a seamless user experience.
 
-**URL**: https://lovable.dev/projects/bad76af4-a2a4-4f57-b265-5e0113cf8556
+## ✨ Features
 
-## How can I edit this code?
+### 🏢 Location Selection
+- Interactive location finder for wax centers
+- Integration with Zenoti API for real-time center data
+- Smart location-based service filtering
 
-There are several ways of editing your application.
+### 💆‍♀️ Service Selection
+- Comprehensive wax service catalog
+- Dynamic pricing calculations
+- Service bundling and recommendations
 
-**Use Lovable**
+### 🎫 Pass Recommendations
+- Intelligent pass suggestions based on selected services
+- Cost optimization algorithms
+- Flexible pass options and pricing tiers
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/bad76af4-a2a4-4f57-b265-5e0113cf8556) and start prompting.
+### 📋 Booking & Checkout
+- Streamlined booking flow
+- Real-time pricing updates
+- Booking confirmation and success tracking
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🎨 Modern UI/UX
+- Responsive design with Tailwind CSS
+- Beautiful animations and transitions
+- Glassmorphism design elements
+- Floating gradient backgrounds
+- Mobile-first approach
 
-**Use your preferred IDE**
+## 🛠️ Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS with custom animations
+- **UI Components**: Radix UI primitives with shadcn/ui
+- **Routing**: React Router DOM
+- **State Management**: React Context API
+- **API Integration**: Zenoti API
+- **Form Handling**: React Hook Form with Zod validation
+- **Icons**: Lucide React
+- **Charts**: Recharts
+- **Notifications**: Sonner toasts
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Quick Start
 
-Follow these steps:
+### Prerequisites
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- Node.js 16+ (recommended: use [nvm](https://github.com/nvm-sh/nvm))
+- npm, yarn, or bun package manager
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Installation
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Set up environment variables (see Environment Setup section below)
-
-# Step 5: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## Environment Setup
-
-This project requires environment variables to function properly. Follow these steps:
-
-1. **Copy the environment template:**
-   ```sh
-   cp .env.example .env
+1. **Clone the repository**
+   ```bash
+   git clone <your-repository-url>
+   cd wax-pass-calculator
    ```
 
-2. **Edit the `.env` file with your actual values:**
-   ```sh
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   bun install
+   ```
+
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your configuration:
+   ```env
    # Required: Your Zenoti API key
    VITE_ZENOTI_API_KEY=your_actual_api_key_here
    
-   # Optional: Custom API base URL (defaults to https://api.zenoti.com/v1)
+   # Optional: Custom API base URL
    VITE_ZENOTI_API_BASE_URL=https://api.zenoti.com/v1
    ```
 
-3. **Get your Zenoti API key:**
-   - Log into your Zenoti dashboard
-   - Navigate to API settings
-   - Generate or copy your API key
+4. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-⚠️ **Important:** Never commit your `.env` file to version control. It's already included in `.gitignore`.
+5. **Open your browser**
+   Navigate to `http://localhost:5173` to see the application.
 
-## What technologies are used for this project?
+## 📜 Available Scripts
 
-This project is built with:
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm run build:dev` - Build for development environment
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint for code quality
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🏗️ Project Structure
 
-## How can I deploy this project?
+```
+src/
+├── components/
+│   ├── ui/              # Reusable UI components (shadcn/ui)
+│   └── waxPass/         # Wax pass specific components
+├── pages/
+│   └── WaxPassCalculator.tsx  # Main calculator page
+├── lib/
+│   ├── WaxPassContext.tsx     # Global state management
+│   └── zenotiApi.ts           # Zenoti API integration
+├── data/
+│   └── waxPassData.ts         # Static data and types
+├── hooks/               # Custom React hooks
+├── App.tsx             # Main application component
+└── main.tsx           # Application entry point
+```
 
-Simply open [Lovable](https://lovable.dev/projects/bad76af4-a2a4-4f57-b265-5e0113cf8556) and click on Share -> Publish.
+## 🔧 Configuration
 
-## Can I connect a custom domain to my Lovable project?
+### Tailwind CSS
+The project uses a custom Tailwind configuration with:
+- Custom color schemes
+- Animation utilities
+- Typography plugin
+- Responsive breakpoints
 
-Yes, you can!
+### TypeScript
+Configured with strict type checking and modern ES features.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### ESLint
+Code quality enforcement with React-specific rules.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🌐 API Integration
+
+The application integrates with the Zenoti API for:
+- Fetching wax center locations
+- Real-time service pricing
+- Booking management
+- Pass availability
+
+## 🎨 Design System
+
+Built with a cohesive design system featuring:
+- **Colors**: Custom brand palette with gradients
+- **Typography**: Clean, readable font hierarchy
+- **Spacing**: Consistent spacing scale
+- **Components**: Reusable UI components
+- **Animations**: Smooth transitions and micro-interactions
+
+## 📱 Responsive Design
+
+Fully responsive design that works seamlessly across:
+- Desktop computers
+- Tablets
+- Mobile devices
+- Different screen orientations
+
+## 🔒 Environment Variables
+
+Required environment variables:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_ZENOTI_API_KEY` | Your Zenoti API key for service integration | Yes |
+| `VITE_ZENOTI_API_BASE_URL` | Base URL for Zenoti API (optional) | No |
+
+⚠️ **Security Note**: Never commit your `.env` file. Keep your API keys secure and use different keys for development and production.
+
+## 🚀 Deployment
+
+### Development Build
+```bash
+npm run build:dev
+```
+
+### Production Build
+```bash
+npm run build
+```
+
+The built files will be in the `dist/` directory, ready for deployment to any static hosting service.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is private and proprietary. All rights reserved.
+
+## 🆘 Support
+
+For support, please contact the development team or create an issue in the repository.
+
+---
+
+Built with ❤️ using modern web technologies
