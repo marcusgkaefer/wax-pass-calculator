@@ -164,12 +164,39 @@ Required environment variables:
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `VITE_ZENOTI_API_KEY` | Your Zenoti API key for service integration | Yes |
+| `VITE_ZENOTI_API_KEY` | Your Zenoti API key for service integration | No* |
 | `VITE_ZENOTI_API_BASE_URL` | Base URL for Zenoti API (optional) | No |
+| `VITE_USE_MOCK_DATA` | Force mock data usage (set to 'true') | No |
+
+\* The API key is optional. When not provided, the app automatically uses mock data.
 
 ⚠️ **Security Note**: Never commit your `.env` file. Keep your API keys secure and use different keys for development and production.
 
 ## 🚀 Deployment
+
+### Vercel Deployment (Recommended)
+
+The application is optimized for deployment on Vercel with automatic mock data fallback when API keys are not available.
+
+#### Quick Deploy
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/wax-pass-calculator)
+
+#### Manual Deployment
+1. Push your code to GitHub
+2. Import the project on [Vercel](https://vercel.com)
+3. Configure environment variables (optional):
+   - For production with API: Add `VITE_ZENOTI_API_KEY`
+   - For demo/mock mode: Leave blank or set `VITE_USE_MOCK_DATA=true`
+4. Deploy!
+
+#### Mock Data Mode
+When deployed without API credentials, the app automatically uses mock data with:
+- 3 sample wax center locations in New York
+- Full catalog of waxing services
+- Realistic pricing and pass recommendations
+- Complete calculator functionality
+
+Perfect for demos, development, or public deployments.
 
 ### Development Build
 ```bash
@@ -182,6 +209,8 @@ npm run build
 ```
 
 The built files will be in the `dist/` directory, ready for deployment to any static hosting service.
+
+For detailed deployment instructions, see [docs/deployment/vercel-deployment.md](docs/deployment/vercel-deployment.md).
 
 ## 🤝 Contributing
 

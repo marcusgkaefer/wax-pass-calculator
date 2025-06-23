@@ -1,4 +1,5 @@
 import { config } from './config';
+import { mockCenters, getMockServicesForCenter } from './mockData';
 
 // Zenoti API interfaces
 export interface ZenotiCenter {
@@ -168,6 +169,10 @@ class ApiCache {
 // Zenoti API service
 export class ZenotiApiService {
   private static async makeRequest<T>(endpoint: string): Promise<T> {
+    if (config.useMockData) {
+      throw new Error('Mock mode is enabled - API calls should not be made');
+    }
+    
     const url = `${config.zenoti.baseUrl}${endpoint}`;
     
     try {
@@ -190,6 +195,12 @@ export class ZenotiApiService {
   }
 
   static async getAllCenters(forceRefresh = false): Promise<ZenotiCenter[]> {
+    // Use mock data if enabled
+    if (config.useMockData) {
+      console.log('Using mock centers data');
+      return mockCenters;
+    }
+    
     const cacheKey = config.cache.centersKey;
 
     // Check cache first unless force refresh is requested
@@ -264,6 +275,12 @@ export class ZenotiApiService {
 
   // Services API methods
   static async getCenterServices(centerId: string, forceRefresh = false): Promise<ZenotiService[]> {
+    // Use mock data if enabled
+    if (config.useMockData) {
+      console.log(`Using mock services data for center ${centerId}`);
+      return getMockServicesForCenter(centerId);
+    }
+    
     const cacheKey = `${config.cache.servicesKey}_${centerId}`;
 
     // Check cache first unless force refresh is requested
