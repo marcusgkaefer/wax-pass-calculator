@@ -164,14 +164,7 @@ function WaxPassCalculatorContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      {/* Floating Gradient Orbs Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-pink-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-cyan-400/15 to-blue-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
-
+    <div className="relative">
       {/* Animated Header */}
       {showHeader && (
         <div className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
@@ -274,7 +267,7 @@ function WaxPassCalculatorContent() {
       )}
 
       {/* Main Content */}
-      <div className={`relative z-10 ${showHeader ? 'pt-24' : 'pt-0'} ${showFooter ? 'pb-20' : 'pb-8'}`}>
+      <div className={`relative z-10 ${showHeader ? 'pt-24' : 'pt-0'} ${showFooter ? 'pb-24' : 'pb-8'}`}>
         
         {/* Steps Progress Indicator - In Main Content */}
         {showHeader && (
@@ -307,13 +300,10 @@ function WaxPassCalculatorContent() {
                           )}
                         </div>
                         <div className="text-center">
-                          <div className={`text-sm font-semibold mb-1 transition-colors duration-300 ${
+                          <div className={`text-sm font-semibold transition-colors duration-300 ${
                             isActive ? 'text-pink-600' : isCompleted ? 'text-green-600' : 'text-gray-600'
                           }`}>
                             {phaseItem.name}
-                          </div>
-                          <div className="text-xs text-gray-500 max-w-20">
-                            {phaseItem.description}
                           </div>
                         </div>
                       </div>

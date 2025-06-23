@@ -76,7 +76,7 @@ export default function CalculatorFooter({
               onClick={onBack}
               variant="ghost"
               size="sm"
-              className="glass-micro-interaction border border-white/30 hover:bg-white/20 text-gray-700"
+              className="glass-micro-interaction border border-white/30 hover:bg-white/20 text-gray-700 h-8"
             >
               <ArrowLeft className="h-3 w-3 mr-1" />
               <span className="text-xs">{backText}</span>
@@ -99,7 +99,7 @@ export default function CalculatorFooter({
               onClick={onContinue}
               disabled={!canContinue}
               size="sm"
-              className="glass-micro-interaction bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0 hover:from-pink-600 hover:to-purple-600 shadow-md disabled:opacity-50 disabled:hover:from-pink-500 disabled:hover:to-purple-500"
+              className="glass-micro-interaction bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0 hover:from-pink-600 hover:to-purple-600 shadow-md disabled:opacity-50 disabled:hover:from-pink-500 disabled:hover:to-purple-500 h-8"
             >
               <span className="text-xs">{continueText}</span>
               <ArrowRight className="h-3 w-3 ml-1" />

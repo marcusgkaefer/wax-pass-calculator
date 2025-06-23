@@ -888,7 +888,7 @@ const LocationSelection: React.FC<LocationSelectionProps> = ({ onContinue }) => 
             <Button
               variant="outline"
               onClick={handleGeolocation}
-              className="flex items-center gap-2 glass-micro-interaction border-white/40 px-4"
+              className="flex items-center gap-2 glass-micro-interaction border-white/40 px-4 h-9"
               disabled={isLoadingLocation || isLoading}
             >
               <Compass className={`h-4 w-4 ${isLoadingLocation ? 'animate-spin' : ''}`} />

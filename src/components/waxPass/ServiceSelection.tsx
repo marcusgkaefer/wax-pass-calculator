@@ -131,14 +131,14 @@ export default function ServiceSelection({ onContinue, onBack }: ServiceSelectio
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50/30 via-purple-50/20 to-cyan-50/30">
+    <div className="min-h-screen">
       {/* Fixed Header */}
-      <div className="sticky top-0 z-50 glass-ultra-light backdrop-blur-xl border-b border-white/20">
+      <div className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/20">
         <div className="max-w-4xl mx-auto px-6 py-6">
           {/* Title Section */}
           <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center shadow-lg">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <h1 className="text-2xl font-bold text-gray-800">Select Your Services</h1>
@@ -155,22 +155,22 @@ export default function ServiceSelection({ onContinue, onBack }: ServiceSelectio
 
           {/* Search Bar */}
           <div className="relative max-w-md mx-auto">
-            <div className="glass-light rounded-2xl border border-white/30">
-              <div className="flex items-center px-4 py-3">
+            <div className="glass-card rounded-2xl border border-white/20">
+              <div className="flex items-center px-4 py-2.5">
                 <Search className="h-5 w-5 text-gray-400 mr-3" />
                 <Input
                   type="text"
                   placeholder="Search services..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-0 shadow-none focus-visible:ring-0 bg-transparent placeholder:text-gray-400 text-gray-700"
+                  className="border-0 shadow-none focus-visible:ring-0 bg-transparent placeholder:text-gray-400 text-gray-700 h-7"
                 />
                 {searchQuery && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setSearchQuery('')}
-                    className="ml-2 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                    className="ml-2 h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -238,7 +238,7 @@ export default function ServiceSelection({ onContinue, onBack }: ServiceSelectio
                           key={service.service_id}
                           className={`cursor-pointer transition-all duration-300 hover:scale-[1.01] ${
                             isSelected 
-                              ? 'glass-premium bg-gradient-to-r from-pink-500/5 to-purple-500/5 border-pink-300/50 shadow-lg shadow-pink-500/10' 
+                              ? 'ring-2 ring-pink-500 glass-premium shadow-xl shadow-pink-500/25 scale-[1.02] border-pink-200/50' 
                               : 'glass-light border-white/30 hover:glass-card hover:shadow-md'
                           }`}
                           onClick={() => handleServiceToggle(service)}
@@ -273,7 +273,7 @@ export default function ServiceSelection({ onContinue, onBack }: ServiceSelectio
                               <div className="ml-4">
                                 <div className={`w-6 h-6 rounded-xl border-2 flex items-center justify-center transition-all duration-300 ${
                                   isSelected 
-                                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 border-pink-500' 
+                                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 border-pink-500 shadow-lg' 
                                     : 'border-gray-300 hover:border-purple-400'
                                 }`}>
                                   {isSelected ? (
@@ -318,38 +318,52 @@ export default function ServiceSelection({ onContinue, onBack }: ServiceSelectio
         )}
       </div>
 
-      {/* Fixed Bottom Summary */}
+      {/* Fixed Bottom Summary - Updated Design */}
       {selectedServices.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-          <div className="max-w-md mx-auto">
-            <Card className="glass-premium border-white/40 shadow-2xl shadow-pink-500/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="font-semibold text-gray-800">
-                      {selectedServices.length} service{selectedServices.length !== 1 ? 's' : ''} selected
-                    </p>
-                    <p className="text-2xl font-bold text-pink-600">
-                      {formatCurrency(totalPrice)}
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => selectedServices.forEach(s => removeService(s.service_id))}
-                    className="border-white/30 hover:bg-red-50/50 hover:border-red-200/50 hover:text-red-600"
-                  >
-                    Clear all
-                  </Button>
+        <div className="fixed bottom-0 left-0 right-0 z-40 glass-premium border-t border-white/30 shadow-lg backdrop-blur-xl">
+          {/* Thin Progress Bar */}
+          <div className="h-0.5 bg-gray-200/30">
+            <div 
+              className="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-500 ease-out"
+              style={{ width: '50%' }}
+            />
+          </div>
+
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex items-center justify-between">
+              {/* Service Summary */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Sparkles className="h-4 w-4 text-pink-500" />
+                  <span className="font-medium">
+                    {selectedServices.length} service{selectedServices.length !== 1 ? 's' : ''} selected
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center gap-1 text-green-600">
+                  <DollarSign className="h-4 w-4" />
+                  <span className="font-bold text-lg">{formatCurrency(totalPrice)}</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => selectedServices.forEach(s => removeService(s.service_id))}
+                  className="glass-micro-interaction border border-white/30 hover:bg-white/20 text-gray-700 text-xs h-8"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Clear all
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Bottom Padding for Fixed Summary */}
-      {selectedServices.length > 0 && <div className="h-32" />}
+      {selectedServices.length > 0 && <div className="h-20" />}
     </div>
   );
 } 

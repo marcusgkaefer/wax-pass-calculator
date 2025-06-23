@@ -30,24 +30,17 @@ export default function SummaryCheckout({ onBack, onComplete }: SummaryCheckoutP
   };
 
   return (
-    <div className="min-h-screen glass-ultra-light">
-      {/* Floating Gradient Orbs Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-pink-400/30 to-purple-400/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-purple-400/25 to-pink-400/25 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
-
-      <div className="relative z-10 container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-6">
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-4">
             {onBack && (
               <Button 
                 onClick={onBack}
                 variant="ghost" 
                 size="sm"
-                className="glass-micro-interaction hover:bg-white/20 border border-white/30"
+                className="glass-micro-interaction hover:bg-white/20 border border-white/20"
                 disabled={isBookingInProgress}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -61,11 +54,11 @@ export default function SummaryCheckout({ onBack, onComplete }: SummaryCheckoutP
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Booking Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Location & Services */}
-            <Card className="glass-card border-white/40">
+            <Card className="glass-card border-white/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg text-gray-800">
                   <MapPin className="h-5 w-5 text-pink-500" />
@@ -110,7 +103,7 @@ export default function SummaryCheckout({ onBack, onComplete }: SummaryCheckoutP
 
             {/* Selected Pass */}
             {selectedPasses.length > 0 && (
-              <Card className="glass-card border-white/40">
+              <Card className="glass-card border-white/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg text-gray-800">
                     <Gift className="h-5 w-5 text-purple-500" />
@@ -146,7 +139,7 @@ export default function SummaryCheckout({ onBack, onComplete }: SummaryCheckoutP
             )}
 
             {/* Benefits Summary */}
-            <Card className="glass-card border-white/40">
+            <Card className="glass-card border-white/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg text-gray-800">
                   <Sparkles className="h-5 w-5 text-yellow-500" />
@@ -190,7 +183,7 @@ export default function SummaryCheckout({ onBack, onComplete }: SummaryCheckoutP
 
           {/* Booking Summary Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="glass-card border-white/40 sticky top-4">
+            <Card className="glass-card border-white/20 sticky top-4">
               <CardHeader>
                 <CardTitle className="text-lg text-gray-800">Booking Summary</CardTitle>
               </CardHeader>
