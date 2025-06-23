@@ -177,7 +177,7 @@ export default function BookingSuccess({ onComplete, bookingData }: BookingSucce
         </Card>
 
         {/* Special Offers */}
-        <Card className="glass-card border-white/40 mb-8">
+        <Card className="glass-card border-white/20 mb-8">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -238,7 +238,7 @@ export default function BookingSuccess({ onComplete, bookingData }: BookingSucce
             onClick={() => window.print()}
             variant="outline"
             size="lg"
-            className="glass-micro-interaction border-white/40 hover:bg-white/20"
+            className="glass-micro-interaction border-white/20 hover:bg-white/20"
           >
             📄 Print Confirmation
           </Button>
